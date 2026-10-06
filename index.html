@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDJJ Arroceros - Ministerio de Producción Corrientes</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Leaflet para el mapa satelital -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- jsPDF y AutoTable para crear el PDF en memoria -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+
+  <div class="container">
+    <header class="header-institucional">
+      <div>
+        <h2>Dirección de Economía Agraria</h2>
+        <h1>DECLARACIÓN JURADA</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
+          Registro de Productores Arroceros — Campaña Agrícola Corrientes
+        </p>
+      </div>
+      <div>
+        <span
+          style="font-size: 0.8rem; font-weight: 700; color: var(--green-corrientes); background: var(--green-soft); padding: 6px 12px; border-radius: 20px; border: 1px solid #bbf7d0;">
+          FORMULARIO ÚNICO
+        </span>
+      </div>
+    </header>
+
+    <div class="box-help">
+      <span class="icon">?</span>
+      <span>Completá los datos del establecimiento y la producción para presentar la declaración jurada.</span>
+    </div>
+
+    <!-- Pantalla de Éxito -->
+    <div id="mensajeExito">
+      <h2>¡Declaración Jurada Presentada con Éxito!</h2>
+      <p id="txtComprobante" style="margin: 12px 0; font-size: 1.1rem; font-weight: 700; color: var(--text-main);"></p>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        La información y el comprobante oficial han sido archivados en el sistema del Ministerio de Producción. Ya podés
+        cerrar esta pestaña.
+      </p>
+    </div>
+
+    <form id="arrozForm">
+      <!-- SECCIÓN 1: DATOS DEL PRODUCTOR -->
+      <section class="form-section">
+        <div class="section-title">
+          <span>1. Datos del Productor</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="tipo_persona">Tipo de persona *</label>
+            <select name="tipo_persona" id="tipo_persona" required>
+              <option value="Física">Física</option>
+              <option value="Jurídica">Jurídica</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>¿Por quién declara? *</label>
+            <div class="radio-group">
+              <label><input type="radio" name="declara_por" value="Por mí mismo" checked> Por mí mismo</label>
+              <label><input type="radio" name="declara_por" value="Por otra persona"> Por otra persona</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="productor">Apellido y nombre / Razón Social *</label>
+            <input type="text" name="productor" id="productor" required placeholder="Ej: Martin Micelli">
+          </div>
+          <div class="input-group">
+            <label for="tipo_doc">Tipo de documento *</label>
+            <select name="tipo_doc" id="tipo_doc" required>
+              <option value="DNI">DNI - Documento Nacional de Identidad</option>
+              <option value="CUIT">CUIT</option>
+              <option value="Pasaporte">Pasaporte</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="input-group">
+            <label for="num_doc">Número de documento *</label>
+            <input type="text" name="num_doc" id="num_doc" required placeholder="33333333">
+            <small>7 u 8 dígitos, sin puntos ni espacios.</small>
+          </div>
+          <div class="input-group">
+            <label for="cuit">CUIT / CUIL *</label>
+            <input type="text" name="cuit" id="cuit" required placeholder="20-32276470-8">
+            <small>Once dígitos. Los guiones se agregan solos.</small>
+          </div>
+          <div class="input-group">
+            <label for="sexo">Sexo</label>
+            <select name="sexo" id="sexo">
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Otro">Otro / No declara</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: CONTACTO -->
+      <section class="form-section">
+        <div class="section-title">
+          <span>2. Contacto</span>
+        </div>
+        <div class="grid-3">
+          <div class="input-group">
+            <label for="telefono1">Teléfono 1 *</label>
+            <input type="tel" name="telefono1" id="telefono1" required placeholder="03794672526">
+            <small>Solo números con característica.</small>
+          </div>
+          <div class="input-group">
+            <label for="email">Correo electrónico *</label>
+            <input type="email" name="email" id="email" required placeholder="tinchomicelli@gmail.com">
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: DOMICILIO (PARTICULAR O LEGAL) -->
+      <section class="form-section">
+        <div class="section-title">
+          <span>3. Domicilio (Particular o Legal)</span>
+        </div>
+        <div class="grid-3">
+          <div class="input-group">
+            <label for="domicilio_tipo">Tipo de Domicilio *</label>
+            <select name="domicilio_tipo" id="domicilio_tipo" required>
+              <option value="Particular">Particular</option>
+              <option value="Legal">Legal</option>
+              <option value="Comercial">Comercial</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="domicilio_pais">País *</label>
+            <input type="text" name="domicilio_pais" id="domicilio_pais" value="Argentina" required>
+          </div>
+          <div class="input-group">
+            <label for="domicilio_provincia">Provincia *</label>
+            <input type="text" name="domicilio_provincia" id="domicilio_provincia" value="Corrientes" required>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="input-group">
+            <label for="domicilio_depto">Departamento *</label>
+            <select name="domicilio_depto" id="domicilio_depto" required>
+              <option value="">Seleccionar...</option>
+              <option value="Capital">Capital</option>
+              <option value="Mercedes">Mercedes</option>
+              <option value="Curuzú Cuatiá">Curuzú Cuatiá</option>
+              <option value="Paso de los Libres">Paso de los Libres</option>
+              <option value="Goya">Goya</option>
+              <option value="San Roque">San Roque</option>
+              <option value="Santo Tomé">Santo Tomé</option>
+              <option value="Ituzaingó">Ituzaingó</option>
+              <option value="Bella Vista">Bella Vista</option>
+              <option value="Esquina">Esquina</option>
+              <option value="Monte Caseros">Monte Caseros</option>
+              <option value="San Martín">San Martín</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="domicilio_municipio">Municipio *</label>
+            <input type="text" name="domicilio_municipio" id="domicilio_municipio" placeholder="Ej: Corrientes"
+              required>
+          </div>
+          <div class="input-group">
+            <label for="domicilio_paraje">Paraje</label>
+            <input type="text" name="domicilio_paraje" id="domicilio_paraje" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="input-group">
+            <label for="domicilio_seccion">Sección</label>
+            <input type="text" name="domicilio_seccion" id="domicilio_seccion" placeholder="Opcional">
+          </div>
+          <div class="input-group">
+            <label for="domicilio_cp">C.P.</label>
+            <input type="text" name="domicilio_cp" id="domicilio_cp" placeholder="3400">
+            <small>Cuatro números o código postal.</small>
+          </div>
+          <div class="input-group">
+            <label for="domicilio_barrio">Barrio</label>
+            <input type="text" name="domicilio_barrio" id="domicilio_barrio" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="domicilio_calle">Calle / Ruta y Número *</label>
+          <input type="text" name="domicilio_calle" id="domicilio_calle"
+            placeholder="Ej: Calle San Martín 1234 o Ruta 12 Km 1020" required>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 4: PREDIO -->
+      <section class="form-section">
+        <div class="section-title">
+          <span>4. Predio y Tenencia</span>
+        </div>
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="departamento">Departamento del Predio *</label>
+            <select name="departamento" id="departamento" required>
+              <option value="">Seleccionar departamento...</option>
+              <option value="Capital">Capital</option>
+              <option value="Mercedes">Mercedes</option>
+              <option value="Curuzú Cuatiá">Curuzú Cuatiá</option>
+              <option value="Paso de los Libres">Paso de los Libres</option>
+              <option value="Goya">Goya</option>
+              <option value="San Roque">San Roque</option>
+              <option value="Santo Tomé">Santo Tomé</option>
+              <option value="Ituzaingó">Ituzaingó</option>
+              <option value="Bella Vista">Bella Vista</option>
+              <option value="Esquina">Esquina</option>
+              <option value="Monte Caseros">Monte Caseros</option>
+              <option value="San Martín">San Martín</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="municipio">Municipio / Paraje del Predio *</label>
+            <input type="text" name="municipio" id="municipio" required placeholder="Ej: Mercedes / Paraje Boquerón">
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="input-group">
+            <label for="partida">Número de Partida Inmobiliaria *</label>
+            <input type="text" name="partida" id="partida" required placeholder="Ej: F4 444444-4">
+          </div>
+          <div class="input-group">
+            <label for="tenencia">Tenencia de la Partida *</label>
+            <select name="tenencia" id="tenencia" required>
+              <option value="Propietario">Propietario</option>
+              <option value="Arrendatario">A — Arrendatario</option>
+              <option value="Aparcero">Aparcero</option>
+              <option value="Comodato">Comodato</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="renspa">RENSPA *</label>
+            <input type="text" name="renspa" id="renspa" required placeholder="01.002.0.00255/00">
+            <small>Trece dígitos. Puntos y barra.</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 5: PRODUCCIÓN ARROZ -->
+      <section class="form-section">
+        <div class="section-title">
+          <span>5. Datos de Producción (Cultivo de Arroz)</span>
+        </div>
+        <div class="grid-3">
+          <div class="input-group">
+            <label for="sup_arroz">Sup. total destinada al cultivo de arroz (Ha) *</label>
+            <input type="number" step="0.1" name="sup_arroz" id="sup_arroz" required placeholder="0.0">
+          </div>
+          <div class="input-group">
+            <label for="sup_sembrada">Superficie sembrada (Ha) *</label>
+            <input type="number" step="0.1" name="sup_sembrada" id="sup_sembrada" required placeholder="0.0">
+          </div>
+          <div class="input-group">
+            <label for="sup_regada">Superficie regada (Ha) *</label>
+            <input type="number" step="0.1" name="sup_regada" id="sup_regada" required placeholder="0.0">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="input-group">
+            <label for="fecha_siembra">Fecha inicio siembra *</label>
+            <input type="date" name="fecha_siembra" id="fecha_siembra" required>
+          </div>
+          <div class="input-group">
+            <label for="campana">Campaña *</label>
+            <input type="text" name="campana" id="campana" required value="2026/2027">
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 6: UBICACIÓN DEL LOTE (MAPA INTERACTIVO OFICIAL) -->
+      <section class="form-section">
+        <div class="map-header">
+          <div class="map-title-row">
+            <span class="map-title">Ubicación del lote</span>
+            <a href="#" class="map-help-link" onclick="return false;">
+              <span class="icon-help">?</span> Cómo marcar el lote en el mapa
+            </a>
+          </div>
+          <!-- Selector de Capas Oficial Corrientes -->
+          <div class="map-layer-selector">
+            <button type="button" id="btnCapaSatelite" class="layer-btn active">Satélite</button>
+            <button type="button" id="btnCapaIGN" class="layer-btn">Mapa IGN</button>
+          </div>
+        </div>
+
+        <p class="map-subtitle" id="mapaInstruccion">
+          Marcar el lote en el mapa es opcional: la declaración se presenta igual. Marcarlo ayuda a que la evaluación
+          ubique el terreno afectado.
+        </p>
+
+        <!-- Contenedor del Mapa -->
+        <div id="mapaLote" class="map-container"></div>
+
+        <!-- Barra de Botones Principal (Modo Inicial) -->
+        <div id="barraHerramientasInicial" class="map-toolbar">
+          <button type="button" id="btnDibujarLote" class="btn-green-tool">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            Dibujar el lote
+          </button>
+          <button type="button" id="btnAbrirCargarCoords" class="btn-outline-tool">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+            Cargar coordenadas
+          </button>
+          <button type="button" id="btnDetectarUbicacion" class="btn-outline-tool">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Detectar mi ubicación
+          </button>
+        </div>
+
+        <!-- Barra de Botones Secundaria (Cuando el lote está dibujado) -->
+        <div id="barraHerramientasDibujado" class="map-toolbar"
+          style="display: none; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 8px;">
+            <button type="button" id="btnAjustarEsquinas" class="btn-outline-tool">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              Ajustar esquinas
+            </button>
+            <button type="button" id="btnBorrarDibujo" class="btn-danger-outline-tool">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Borrar el dibujo
+            </button>
+          </div>
+          <div class="lote-status-badge">
+            <span class="check-icon">✓</span>
+            <span style="font-weight: 700; color: #356F23;">Lote marcado</span>
+            <span id="txtHectareasCalc" style="color: #64748b;">· 0,0 ha de referencia</span>
+          </div>
+        </div>
+
+        <small id="txtNotaLote" class="map-foot-note" style="display: none;">
+          La superficie del dibujo es orientativa y no reemplaza la superficie que declarás arriba.
+        </small>
+
+        <!-- Bloque Plegable: Cargar Coordenadas Manualmente -->
+        <div id="cajaCargarCoords" class="coords-box" style="display: none;">
+          <div class="input-group">
+            <label for="inputCoordenadaCampo">Coordenada del campo</label>
+            <textarea id="inputCoordenadaCampo" rows="2" placeholder="-27.4691, -58.8306"></textarea>
+            <small>Latitud y longitud, como las da el celular (-27.4691, -58.8306) o un GPS (27°28'08.8"S 58°49'50.2"O).
+              Si tiene los vértices del lote, uno por renglón.</small>
+          </div>
+
+          <div class="input-group" style="max-width: 250px;">
+            <label for="inputSuperficieLote">Superficie del lote (ha)</label>
+            <input type="number" step="0.1" id="inputSuperficieLote" placeholder="0.0">
+            <small>Con una sola coordenada se dibuja un cuadrado de esta superficie alrededor del punto. No es el
+              contorno real del campo: sirve para ubicarlo, y las esquinas se ajustan después.</small>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 12px;">
+            <button type="button" id="btnAplicarCoords" class="btn-green-tool">
+              ✓ Dibujar en el mapa
+            </button>
+            <button type="button" id="btnCancelarCoords" class="btn-outline-tool">
+              ✕ Cancelar
+            </button>
+          </div>
+        </div>
+
+        <!-- Botón Quitar todo -->
+        <div style="margin-top: 14px;">
+          <button type="button" id="btnQuitarTodo" class="btn-quitar-map">Quitar</button>
+        </div>
+
+        <!-- Input invisible para enviar los datos de geolocalización al backend -->
+        <input type="hidden" name="coordenadas_lote" id="coordenadas_lote">
+      </section>
+
+      <!-- SECCIÓN 7: DECLARACIÓN JURADA Y ENVÍO -->
+      <div class="box-legal">
+        <p>
+          DECLARO BAJO JURAMENTO QUE LOS DATOS CONSIGNADOS PRECEDENTEMENTE SON VERACES Y REFLEJAN LA REALIDAD DEL
+          ESTABLECIMIENTO.
+          ASUMO CONOCER LAS SANCIONES ESPECIFICADAS POR LA LEY QUE ME CORRESPONDE EN CASO DE VERIFICARSE FALSEDAD EN LOS
+          DATOS (ART. 292 Y 293 CÓDIGO PENAL DE LA NACIÓN).
+        </p>
+        <label>
+          <input type="checkbox" id="checkLegal" required>
+          Confirmo bajo juramento que los datos declarados son veraces
+        </label>
+      </div>
+
+      <button type="submit" id="btnSubmit" class="btn-submit">Presentar Declaración Jurada</button>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

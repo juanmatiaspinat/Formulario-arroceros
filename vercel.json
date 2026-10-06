@@ -1,0 +1,6 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/control_declaraciones", "destination": "/control_declaraciones.html" }
+  ]
+}

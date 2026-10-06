@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control - DDJJ Arroceras Corrientes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container" style="max-width: 1100px;">
+    <header class="header-institucional">
+      <div>
+        <h1>Control de Declaraciones Juradas</h1>
+        <h2>Auditoría de Productores Arroceros — Ministerio de Producción</h2>
+      </div>
+      <div>
+        <button id="btnRecargar" class="btn-pdf" style="background:#15803d; cursor:pointer;">🔄 Actualizar</button>
+      </div>
+    </header>
+
+    <!-- Barra de búsqueda y filtros -->
+    <div class="grid-3" style="margin-bottom: 20px;">
+      <div class="input-group">
+        <label>Buscar Productor o CUIT</label>
+        <input type="text" id="buscador" placeholder="Escribí para filtrar en vivo...">
+      </div>
+      <div class="input-group">
+        <label>Filtrar por Departamento</label>
+        <select id="filtroDepto">
+          <option value="">Todos los Departamentos</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Total Registros</label>
+        <div id="statTotal" style="font-size: 1.3rem; font-weight: bold; color: var(--primary); padding-top: 8px;">0 declaraciones</div>
+      </div>
+    </div>
+
+    <!-- Tabla de Declaraciones -->
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Comprobante</th>
+            <th>Fecha</th>
+            <th>Productor</th>
+            <th>CUIT</th>
+            <th>Departamento</th>
+            <th>Sup. Arroz</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tablaBody">
+          <tr><td colspan="7" style="text-align: center; padding: 20px;">Cargando declaraciones juradas...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="control.js"></script>
+</body>
+</html>
