@@ -28,8 +28,7 @@
         </p>
       </div>
       <div>
-        <span
-          style="font-size: 0.8rem; font-weight: 700; color: var(--green-corrientes); background: var(--green-soft); padding: 6px 12px; border-radius: 20px; border: 1px solid #bbf7d0;">
+        <span class="badge-form-tipo">
           FORMULARIO ÚNICO
         </span>
       </div>
@@ -52,167 +51,289 @@
 
     <form id="arrozForm">
       <!-- SECCIÓN 1: DATOS DEL PRODUCTOR -->
-      <section class="form-section">
-        <div class="section-title">
-          <span>1. Datos del Productor</span>
+      <section class="form-section" id="sec-1">
+        <div class="section-header-row">
+          <span class="section-title">1. Datos del Productor</span>
+          <span class="status-badge incompleto" id="badge-sec-1">
+            <span class="badge-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="4" cy="12" r="3" />
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="20" cy="12" r="3" />
+              </svg>
+            </span>
+            <span class="badge-txt">Incompleto</span>
+          </span>
         </div>
 
-        <div class="grid-2">
-          <div class="input-group">
-            <label for="tipo_persona">Tipo de persona *</label>
-            <select name="tipo_persona" id="tipo_persona" required>
-              <option value="Física">Física</option>
-              <option value="Jurídica">Jurídica</option>
-            </select>
+        <!-- Caja Desplegable: Qué documentación tener a mano -->
+        <div class="box-help-accordion" id="boxDocAyuda">
+          <div class="box-help-header" id="btnToggleDocAyuda" role="button" tabindex="0">
+            <div class="box-help-left">
+              <span class="icon-help">?</span>
+              <div>
+                <strong class="box-help-title">¿Qué documentación debo tener a mano?</strong>
+                <span class="box-help-sub">Tocá acá para ver las instrucciones y requisitos</span>
+              </div>
+            </div>
+            <span class="chevron-icon" id="flechaAyuda">▼</span>
           </div>
 
-          <div class="input-group">
-            <label>¿Por quién declara? *</label>
-            <div class="radio-group">
-              <label><input type="radio" name="declara_por" value="Por mí mismo" checked> Por mí mismo</label>
-              <label><input type="radio" name="declara_por" value="Por otra persona"> Por otra persona</label>
+          <div class="box-help-content" id="contenidoDocAyuda">
+            <div class="help-item">
+              <strong>DNI y CUIT van sin guiones ni puntos</strong>
+              <p>Los números de DNI y CUIT o CUIL se escriben sin espacios y sin puntos. El sistema agrega los guiones y
+                los puntos automáticamente.</p>
+            </div>
+
+            <div class="help-item">
+              <strong>DNI, CUIT o CUIL de personas físicas</strong>
+              <p>El documento de identidad y el CUIT o CUIL. El CUIL figura en el recibo de sueldo y en la constancia de
+                ARCA; el CUIT, en la constancia de inscripción.</p>
+            </div>
+
+            <div class="help-item">
+              <strong>Personas jurídicas</strong>
+              <p>Si el campo está a nombre de una sociedad, corresponde elegir «jurídica». En ese caso se piden la razón
+                social y el CUIT de la sociedad, además del CUIL de la persona que completa el formulario.</p>
+            </div>
+
+            <div class="help-item">
+              <strong>RENSPA</strong>
+              <p>Quien no tenga el Registro Nacional Sanitario de Productores Agropecuarios puede tramitarlo en
+                www.senasa.gob.ar o en la delegación de SENASA más cercana.</p>
+            </div>
+
+            <div class="help-item">
+              <strong style="margin-bottom: 0;">Debe contar con al menos un número de teléfono y un correo
+                electrónico</strong>
             </div>
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="input-group">
-            <label for="productor">Apellido y nombre / Razón Social *</label>
-            <input type="text" name="productor" id="productor" required placeholder="Ej: Martin Micelli">
-          </div>
-          <div class="input-group">
-            <label for="tipo_doc">Tipo de documento *</label>
-            <select name="tipo_doc" id="tipo_doc" required>
-              <option value="DNI">DNI - Documento Nacional de Identidad</option>
-              <option value="CUIT">CUIT</option>
-              <option value="Pasaporte">Pasaporte</option>
-            </select>
-          </div>
+        <!-- Selector Principal de Persona -->
+        <div class="input-group" style="max-width: 380px; margin-bottom: 20px;">
+          <label for="tipo_persona">Tipo de persona *</label>
+          <select name="tipo_persona" id="tipo_persona" required>
+            <option value="Física" selected>Física</option>
+            <option value="Jurídica">Jurídica</option>
+          </select>
         </div>
 
-        <div class="grid-3">
-          <div class="input-group">
-            <label for="num_doc">Número de documento *</label>
-            <input type="text" name="num_doc" id="num_doc" required placeholder="33333333">
-            <small>7 u 8 dígitos, sin puntos ni espacios.</small>
+        <!-- BLOQUE: PERSONA FÍSICA -->
+        <div id="bloquePersonaFisica">
+          <h4 class="sub-bloque-titulo">Nombre y apellido del productor</h4>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label for="productor_fisica">Apellido y nombre *</label>
+              <input type="text" name="productor_fisica" id="productor_fisica">
+            </div>
+
+            <div class="input-group">
+              <label for="tipo_doc">Tipo de documento *</label>
+              <select name="tipo_doc" id="tipo_doc">
+                <option value="">Seleccionar...</option>
+                <option value="DNI — Documento Nacional de Identidad" selected>DNI — Documento Nacional de Identidad
+                </option>
+                <option value="LC — Libreta Cívica">LC — Libreta Cívica</option>
+                <option value="LE — Libreta de Enrolamiento">LE — Libreta de Enrolamiento</option>
+              </select>
+            </div>
           </div>
-          <div class="input-group">
-            <label for="cuit">CUIT / CUIL *</label>
-            <input type="text" name="cuit" id="cuit" required placeholder="20-32276470-8">
-            <small>Once dígitos. Los guiones se agregan solos.</small>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label for="num_doc">Número de documento *</label>
+              <input type="text" name="num_doc" id="num_doc">
+              <small>7 u 8 dígitos, sin puntos ni espacios.</small>
+            </div>
+
+            <div class="input-group">
+              <label for="cuit_fisica">CUIT / CUIL *</label>
+              <input type="text" name="cuit_fisica" id="cuit_fisica" class="input-cuit">
+              <small>Once dígitos. Los guiones se agregan solos.</small>
+            </div>
           </div>
-          <div class="input-group">
-            <label for="sexo">Sexo</label>
-            <select name="sexo" id="sexo">
+
+          <div class="input-group" style="max-width: 380px;">
+            <label for="sexo_fisica">Sexo</label>
+            <select name="sexo_fisica" id="sexo_fisica">
               <option value="Masculino">Masculino</option>
               <option value="Femenino">Femenino</option>
               <option value="Otro">Otro / No declara</option>
             </select>
           </div>
         </div>
+
+        <!-- BLOQUE: PERSONA JURÍDICA -->
+        <div id="bloquePersonaJuridica" style="display: none;">
+          <h4 class="sub-bloque-titulo">Datos de quien declara por la sociedad</h4>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label for="declarante_juridica">Apellido y nombre *</label>
+              <input type="text" name="declarante_juridica" id="declarante_juridica">
+              <small>De la persona física que declara por la sociedad</small>
+            </div>
+
+            <div class="input-group">
+              <label for="cuil_declarante">CUIL de la persona física *</label>
+              <input type="text" name="cuil_declarante" id="cuil_declarante" class="input-cuit">
+              <small>Once dígitos. Los guiones se agregan solos.</small>
+            </div>
+          </div>
+
+          <div class="input-group" style="max-width: 380px; margin-bottom: 20px;">
+            <label for="sexo_juridica">Sexo</label>
+            <select name="sexo_juridica" id="sexo_juridica">
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Otro">Otro / No declara</option>
+            </select>
+          </div>
+
+          <h4 class="sub-bloque-titulo">Con qué carácter firma</h4>
+
+          <div class="grid-2" style="margin-bottom: 20px;">
+            <div class="input-group">
+              <label for="caracter_sociedad">Carácter ante la sociedad *</label>
+              <select name="caracter_sociedad" id="caracter_sociedad">
+                <option value="">Seleccionar...</option>
+                <option value="Representante legal">Representante legal</option>
+                <option value="Apoderado">Apoderado</option>
+                <option value="Socio gerente">Socio gerente</option>
+                <option value="Presidente del directorio">Presidente del directorio</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+
+            <div class="input-group" id="grupoCaracterOtro" style="display: none;">
+              <label for="caracter_otro">¿Con cuál? *</label>
+              <input type="text" name="caracter_otro" id="caracter_otro">
+              <small>Por ejemplo, albacea testamentario.</small>
+            </div>
+          </div>
+
+          <h4 class="sub-bloque-titulo">Nombre de la empresa (Persona Jurídica)</h4>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label for="razon_social">Razón social *</label>
+              <input type="text" name="razon_social" id="razon_social">
+            </div>
+
+            <div class="input-group">
+              <label for="cuit_empresa">CUIT de la persona jurídica *</label>
+              <input type="text" name="cuit_empresa" id="cuit_empresa" class="input-cuit">
+              <small>Once dígitos. Los guiones se agregan solos.</small>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- SECCIÓN 2: CONTACTO -->
-      <section class="form-section">
-        <div class="section-title">
-          <span>2. Contacto</span>
+      <section class="form-section" id="sec-2">
+        <div class="section-header-row">
+          <span class="section-title">2. Contacto</span>
+          <span class="status-badge incompleto" id="badge-sec-2">
+            <span class="badge-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="4" cy="12" r="3" />
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="20" cy="12" r="3" />
+              </svg>
+            </span>
+            <span class="badge-txt">Incompleto</span>
+          </span>
         </div>
-        <div class="grid-3">
+        <div class="grid-2">
           <div class="input-group">
-            <label for="telefono1">Teléfono 1 *</label>
-            <input type="tel" name="telefono1" id="telefono1" required placeholder="03794672526">
+            <label for="telefono1">Teléfono Principal *</label>
+            <input type="tel" name="telefono1" id="telefono1" required>
             <small>Solo números con característica.</small>
           </div>
           <div class="input-group">
             <label for="email">Correo electrónico *</label>
-            <input type="email" name="email" id="email" required placeholder="tinchomicelli@gmail.com">
+            <input type="email" name="email" id="email" required>
           </div>
         </div>
       </section>
 
-      <!-- SECCIÓN 3: DOMICILIO (PARTICULAR O LEGAL) -->
-      <section class="form-section">
-        <div class="section-title">
-          <span>3. Domicilio (Particular o Legal)</span>
+      <!-- SECCIÓN 3: DOMICILIO -->
+      <section class="form-section" id="sec-3">
+        <div class="section-header-row">
+          <span class="section-title">3. Domicilio (Particular o Legal)</span>
+          <span class="status-badge incompleto" id="badge-sec-3">
+            <span class="badge-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="4" cy="12" r="3" />
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="20" cy="12" r="3" />
+              </svg>
+            </span>
+            <span class="badge-txt">Incompleto</span>
+          </span>
         </div>
+
+        <!-- Fila 1: Tipo de domicilio, País y Provincia -->
         <div class="grid-3">
           <div class="input-group">
             <label for="domicilio_tipo">Tipo de Domicilio *</label>
             <select name="domicilio_tipo" id="domicilio_tipo" required>
-              <option value="Particular">Particular</option>
+              <option value="Particular" selected>Particular</option>
               <option value="Legal">Legal</option>
               <option value="Comercial">Comercial</option>
             </select>
           </div>
+
           <div class="input-group">
             <label for="domicilio_pais">País *</label>
-            <input type="text" name="domicilio_pais" id="domicilio_pais" value="Argentina" required>
+            <select name="domicilio_pais" id="domicilio_pais" required></select>
           </div>
-          <div class="input-group">
+
+          <div class="input-group" id="contenedor_provincia">
             <label for="domicilio_provincia">Provincia *</label>
-            <input type="text" name="domicilio_provincia" id="domicilio_provincia" value="Corrientes" required>
+            <select name="domicilio_provincia" id="domicilio_provincia" required></select>
           </div>
         </div>
 
-        <div class="grid-3">
-          <div class="input-group">
+        <!-- Fila 2: Departamento y Municipio -->
+        <div class="grid-2">
+          <div class="input-group" id="contenedor_depto">
             <label for="domicilio_depto">Departamento *</label>
-            <select name="domicilio_depto" id="domicilio_depto" required>
-              <option value="">Seleccionar...</option>
-              <option value="Capital">Capital</option>
-              <option value="Mercedes">Mercedes</option>
-              <option value="Curuzú Cuatiá">Curuzú Cuatiá</option>
-              <option value="Paso de los Libres">Paso de los Libres</option>
-              <option value="Goya">Goya</option>
-              <option value="San Roque">San Roque</option>
-              <option value="Santo Tomé">Santo Tomé</option>
-              <option value="Ituzaingó">Ituzaingó</option>
-              <option value="Bella Vista">Bella Vista</option>
-              <option value="Esquina">Esquina</option>
-              <option value="Monte Caseros">Monte Caseros</option>
-              <option value="San Martín">San Martín</option>
-              <option value="Otro">Otro</option>
-            </select>
+            <select name="domicilio_depto" id="domicilio_depto" required></select>
           </div>
-          <div class="input-group">
+
+          <div class="input-group" id="contenedor_municipio">
             <label for="domicilio_municipio">Municipio *</label>
-            <input type="text" name="domicilio_municipio" id="domicilio_municipio" placeholder="Ej: Corrientes"
-              required>
-          </div>
-          <div class="input-group">
-            <label for="domicilio_paraje">Paraje</label>
-            <input type="text" name="domicilio_paraje" id="domicilio_paraje" placeholder="Opcional">
+            <select name="domicilio_municipio" id="domicilio_municipio" required></select>
           </div>
         </div>
 
-        <div class="grid-3">
-          <div class="input-group">
-            <label for="domicilio_seccion">Sección</label>
-            <input type="text" name="domicilio_seccion" id="domicilio_seccion" placeholder="Opcional">
-          </div>
-          <div class="input-group">
-            <label for="domicilio_cp">C.P.</label>
-            <input type="text" name="domicilio_cp" id="domicilio_cp" placeholder="3400">
-            <small>Cuatro números o código postal.</small>
-          </div>
-          <div class="input-group">
-            <label for="domicilio_barrio">Barrio</label>
-            <input type="text" name="domicilio_barrio" id="domicilio_barrio" placeholder="Opcional">
-          </div>
-        </div>
-
+        <!-- Fila 3: Dirección -->
         <div class="input-group">
           <label for="domicilio_calle">Calle / Ruta y Número *</label>
-          <input type="text" name="domicilio_calle" id="domicilio_calle"
-            placeholder="Ej: Calle San Martín 1234 o Ruta 12 Km 1020" required>
+          <input type="text" name="domicilio_calle" id="domicilio_calle" required>
         </div>
       </section>
 
       <!-- SECCIÓN 4: PREDIO -->
-      <section class="form-section">
-        <div class="section-title">
-          <span>4. Predio y Tenencia</span>
+      <section class="form-section" id="sec-4">
+        <div class="section-header-row">
+          <span class="section-title">4. Predio y Tenencia</span>
+          <span class="status-badge incompleto" id="badge-sec-4">
+            <span class="badge-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="4" cy="12" r="3" />
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="20" cy="12" r="3" />
+              </svg>
+            </span>
+            <span class="badge-txt">Incompleto</span>
+          </span>
         </div>
+
         <div class="grid-2">
           <div class="input-group">
             <label for="departamento">Departamento del Predio *</label>
@@ -263,13 +384,24 @@
       </section>
 
       <!-- SECCIÓN 5: PRODUCCIÓN ARROZ -->
-      <section class="form-section">
-        <div class="section-title">
-          <span>5. Datos de Producción (Cultivo de Arroz)</span>
+      <section class="form-section" id="sec-5">
+        <div class="section-header-row">
+          <span class="section-title">5. Datos de Producción (Cultivo de Arroz)</span>
+          <span class="status-badge incompleto" id="badge-sec-5">
+            <span class="badge-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="4" cy="12" r="3" />
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="20" cy="12" r="3" />
+              </svg>
+            </span>
+            <span class="badge-txt">Incompleto</span>
+          </span>
         </div>
+
         <div class="grid-3">
           <div class="input-group">
-            <label for="sup_arroz">Sup. total destinada al cultivo de arroz (Ha) *</label>
+            <label for="sup_arroz">Sup. total destinada (Ha) *</label>
             <input type="number" step="0.1" name="sup_arroz" id="sup_arroz" required placeholder="0.0">
           </div>
           <div class="input-group">
@@ -295,7 +427,7 @@
       </section>
 
       <!-- SECCIÓN 6: UBICACIÓN DEL LOTE (MAPA INTERACTIVO OFICIAL) -->
-      <section class="form-section">
+      <section class="form-section" id="sec-6">
         <div class="map-header">
           <div class="map-title-row">
             <span class="map-title">Ubicación del lote</span>
@@ -303,7 +435,6 @@
               <span class="icon-help">?</span> Cómo marcar el lote en el mapa
             </a>
           </div>
-          <!-- Selector de Capas Oficial Corrientes -->
           <div class="map-layer-selector">
             <button type="button" id="btnCapaSatelite" class="layer-btn active">Satélite</button>
             <button type="button" id="btnCapaIGN" class="layer-btn">Mapa IGN</button>
@@ -343,7 +474,7 @@
           </button>
         </div>
 
-        <!-- Barra de Botones Secundaria (Cuando el lote está dibujado) -->
+        <!-- Barra de Botones Secundaria (Lote Dibujado) -->
         <div id="barraHerramientasDibujado" class="map-toolbar"
           style="display: none; justify-content: space-between; align-items: center;">
           <div style="display: flex; gap: 8px;">
@@ -373,20 +504,18 @@
           La superficie del dibujo es orientativa y no reemplaza la superficie que declarás arriba.
         </small>
 
-        <!-- Bloque Plegable: Cargar Coordenadas Manualmente -->
+        <!-- Bloque Plegable: Cargar Coordenadas -->
         <div id="cajaCargarCoords" class="coords-box" style="display: none;">
           <div class="input-group">
             <label for="inputCoordenadaCampo">Coordenada del campo</label>
             <textarea id="inputCoordenadaCampo" rows="2" placeholder="-27.4691, -58.8306"></textarea>
-            <small>Latitud y longitud, como las da el celular (-27.4691, -58.8306) o un GPS (27°28'08.8"S 58°49'50.2"O).
-              Si tiene los vértices del lote, uno por renglón.</small>
+            <small>Latitud y longitud (-27.4691, -58.8306). Si tiene los vértices del lote, uno por renglón.</small>
           </div>
 
           <div class="input-group" style="max-width: 250px;">
             <label for="inputSuperficieLote">Superficie del lote (ha)</label>
             <input type="number" step="0.1" id="inputSuperficieLote" placeholder="0.0">
-            <small>Con una sola coordenada se dibuja un cuadrado de esta superficie alrededor del punto. No es el
-              contorno real del campo: sirve para ubicarlo, y las esquinas se ajustan después.</small>
+            <small>Dibuja un cuadrado de referencia alrededor del punto.</small>
           </div>
 
           <div style="display: flex; gap: 10px; margin-top: 12px;">
@@ -404,7 +533,6 @@
           <button type="button" id="btnQuitarTodo" class="btn-quitar-map">Quitar</button>
         </div>
 
-        <!-- Input invisible para enviar los datos de geolocalización al backend -->
         <input type="hidden" name="coordenadas_lote" id="coordenadas_lote">
       </section>
 
