@@ -30,7 +30,7 @@
 body {
   background-color: var(--bg-page);
   color: var(--text-main);
-  padding: 30px 15px;
+  padding: 30px 15px 10px 15px;
   line-height: 1.5;
 }
 
@@ -39,42 +39,83 @@ body {
   margin: 0 auto;
 }
 
-/* Encabezado Institucional */
+/* ==============================================================================
+   BANNER INSTITUCIONAL (MINISTERIO DE PRODUCCIÓN - CORRIENTES)
+   ============================================================================== */
 .header-institucional {
+  margin-bottom: 16px;
+}
+
+.banner-ministerio {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 25px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-color);
-  gap: 20px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 7px;
 }
 
-.header-institucional h2 {
-  font-size: 0.8rem;
+.logo-escudo {
+  width: 68px;
+  height: auto;
+  object-fit: contain;
+}
+
+.logo-ministerio-oficial {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.texto-ministerio {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.texto-ministerio .txt-min {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.texto-ministerio .txt-prod {
+  font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-bottom: 4px;
+  color: #1e293b;
 }
 
-.header-institucional h1 {
-  font-size: 1.8rem;
+.texto-ministerio .txt-prov {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.03em;
+  margin-top: 1px;
+}
+
+.titulo-declaracion {
+  font-size: 27px;
   font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.02em;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 
-.badge-form-tipo {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--green-corrientes);
-  background: var(--green-soft);
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid #bbf7d0;
-  white-space: nowrap;
+.subtitulo-ley {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.linea-separadora-header {
+  height: 1px;
+  background-color: #e2e8f0;
+  width: 100%;
+  margin-bottom: 18px;
 }
 
 /* Caja de Ayuda Superior */
@@ -100,13 +141,15 @@ body {
   height: 18px;
   border-radius: 50%;
   background: var(--green-corrientes);
-  color: #fff;
+  color: #ffffff;
   font-size: 0.75rem;
   font-weight: bold;
   flex-shrink: 0;
 }
 
-/* Tarjetas de Sección */
+/* ==============================================================================
+   TARJETAS DE SECCIÓN Y MAQUETADO GENERAL
+   ============================================================================== */
 .form-section {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -132,7 +175,7 @@ body {
   margin-bottom: 12px;
 }
 
-/* Grillas */
+/* Grillas responsivas */
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -145,7 +188,7 @@ body {
   gap: 16px;
 }
 
-/* Inputs y Selects */
+/* Inputs, Selects y Textareas */
 .input-group {
   display: flex;
   flex-direction: column;
@@ -221,7 +264,7 @@ body {
   cursor: pointer;
 }
 
-/* Botón Principal */
+/* Botón Principal Submit */
 .btn-submit {
   display: inline-flex;
   justify-content: center;
@@ -247,7 +290,7 @@ body {
   cursor: not-allowed;
 }
 
-/* Mensaje Éxito */
+/* Pantalla de confirmación de éxito */
 #mensajeExito {
   display: none;
   background: #ffffff;
@@ -468,7 +511,7 @@ body {
   height: 16px;
   border-radius: 50%;
   background: #356F23;
-  color: #fff;
+  color: #ffffff;
   font-size: 0.7rem;
   text-decoration: none;
 }
@@ -635,6 +678,120 @@ body {
   background: #fef2f2;
 }
 
+/* ==============================================================================
+   PARTIDAS INMOBILIARIAS Y TENENCIA
+   ============================================================================== */
+.partidas-seccion-header {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+
+.item-bloque-partida {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.item-bloque-partida-extra {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.grid-partida-superficie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.btn-agregar-row {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 18px 0;
+}
+
+.btn-agregar-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ffffff;
+  border: 1.5px dashed var(--green-corrientes);
+  color: var(--green-corrientes);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-agregar-outline:hover {
+  background-color: var(--green-soft);
+  border-style: solid;
+}
+
+.quitar-partida-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+/* ==============================================================================
+   BOTÓN SUBMIT CENTRADO Y FIRMA DE AUTOR
+   ============================================================================== */
+.submit-container-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 25px;
+}
+
+.btn-submit-compacto {
+  width: auto !important;
+  min-width: 280px;
+  max-width: 340px;
+  padding: 0 28px;
+}
+
+.footer-creditos {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+.footer-creditos span {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #171717;
+  letter-spacing: 0.02em;
+}
+
+/* ==============================================================================
+   SEPARACIÓN Y ESTILO DE FLECHA EN TODOS LOS SELECTS
+   ============================================================================== */
+select,
+.form-control,
+.select-tenencia {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 10px 38px 10px 14px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 16px center !important;
+  background-size: 12px !important;
+  cursor: pointer;
+}
+
+/* ==============================================================================
+   RESPONSIVIDAD Y MEDIA QUERIES
+   ============================================================================== */
 @media (max-width: 768px) {
 
   .grid-2,
@@ -644,5 +801,11 @@ body {
 
   .header-institucional {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid-partida-superficie {
+    grid-template-columns: 1fr;
   }
 }

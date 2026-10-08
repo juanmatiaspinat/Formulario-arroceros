@@ -1,4 +1,19 @@
-// URL DEL APPS SCRIPT QUE PUBLICASTE
+/**
+ * ==============================================================================
+ * DECLARACIÓN JURADA ARROCEROS - MINISTERIO DE PRODUCCIÓN DE CORRIENTES
+ * LÓGICA PRINCIPAL (APP.JS)
+ * ==============================================================================
+ * 
+ * 1. ALTERNANCIA DINÁMICA: PERSONA FÍSICA / PERSONA JURÍDICA Y FORMATO CUIT
+ * 2. MAPA LEAFLET OFICIAL (ESRI SATÉLITE + IGN + DIBUJO Y GEOLOCALIZACIÓN)
+ * 3. GENERADOR DE PDF EN MEMORIA (JSPDF + AUTOTABLE)
+ * 4. ENVÍO DEL FORMULARIO Y CONSUMO DE API APPS SCRIPT
+ * 5. VALIDACIÓN EN TIEMPO REAL Y CONTROL DE BADGES POR SECCIÓN
+ * 6. BASE DE DATOS GEOGRÁFICA Y CASCADA DE DOMICILIO
+ * 7. SECCIÓN PREDIO, TENENCIA Y MÁSCARAS ESTRICTAS (PARTIDAS Y RENSPA)
+ */
+
+// URL DEL APPS SCRIPT PUBLICADO (WEB APP)
 const SCRIPT_URL = "PEGAR_ACA_LA_URL_DE_TU_APPS_SCRIPT";
 
 // ==============================================================================
@@ -20,12 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
       bloqueFisica.style.display = "none";
       bloqueJuridica.style.display = "block";
 
-      // Desactivar required de Física
+      // Desactivar campos requeridos de Persona Física
       document.getElementById("productor_fisica").required = false;
       document.getElementById("num_doc").required = false;
       document.getElementById("cuit_fisica").required = false;
 
-      // Activar required de Jurídica
+      // Activar campos requeridos de Persona Jurídica
       document.getElementById("declarante_juridica").required = true;
       document.getElementById("cuil_declarante").required = true;
       document.getElementById("caracter_sociedad").required = true;
@@ -35,12 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
       bloqueFisica.style.display = "block";
       bloqueJuridica.style.display = "none";
 
-      // Activar required de Física
+      // Activar campos requeridos de Persona Física
       document.getElementById("productor_fisica").required = true;
       document.getElementById("num_doc").required = true;
       document.getElementById("cuit_fisica").required = true;
 
-      // Desactivar required de Jurídica
+      // Desactivar campos requeridos de Persona Jurídica
       document.getElementById("declarante_juridica").required = false;
       document.getElementById("cuil_declarante").required = false;
       document.getElementById("caracter_sociedad").required = false;
@@ -49,32 +64,38 @@ document.addEventListener("DOMContentLoaded", () => {
       if (inputCaracterOtro) inputCaracterOtro.required = false;
     }
 
-    // Revalidar sección 1
+    // Revalidar la sección 1 para actualizar el badge de estado
     const sec1 = document.getElementById("sec-1");
     if (sec1) validarSeccion(sec1, "badge-sec-1");
   }
 
-  selectTipoPersona.addEventListener("change", actualizarVisibilidadTipoPersona);
+  if (selectTipoPersona) {
+    selectTipoPersona.addEventListener("change", actualizarVisibilidadTipoPersona);
+  }
 
-  // Mostrar / Ocultar campo "¿Con cuál?"
-  selectCaracter.addEventListener("change", () => {
-    if (selectCaracter.value === "Otro") {
-      grupoCaracterOtro.style.display = "flex";
-      inputCaracterOtro.required = true;
-    } else {
-      grupoCaracterOtro.style.display = "none";
-      inputCaracterOtro.required = false;
-      inputCaracterOtro.value = "";
-    }
-    const sec1 = document.getElementById("sec-1");
-    if (sec1) validarSeccion(sec1, "badge-sec-1");
-  });
+  // Mostrar u ocultar el campo condicional "¿Con cuál?"
+  if (selectCaracter) {
+    selectCaracter.addEventListener("change", () => {
+      if (selectCaracter.value === "Otro") {
+        grupoCaracterOtro.style.display = "flex";
+        inputCaracterOtro.required = true;
+      } else {
+        grupoCaracterOtro.style.display = "none";
+        inputCaracterOtro.required = false;
+        inputCaracterOtro.value = "";
+      }
 
-  // Formato automático de CUIT con guiones
+      const sec1 = document.getElementById("sec-1");
+      if (sec1) validarSeccion(sec1, "badge-sec-1");
+    });
+  }
+
+  // Formato automático de CUIT con guiones (XX-XXXXXXXX-X)
   document.querySelectorAll(".input-cuit").forEach((input) => {
     input.addEventListener("input", (e) => {
       let v = e.target.value.replace(/\D/g, "");
       if (v.length > 11) v = v.slice(0, 11);
+
       if (v.length > 10) {
         e.target.value = `${v.slice(0, 2)}-${v.slice(2, 10)}-${v.slice(10)}`;
       } else if (v.length > 2) {
@@ -97,10 +118,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Inicializa visibilidad
+  // Inicializaciones al cargar el documento
   actualizarVisibilidadTipoPersona();
   inicializarControlBadges();
   inicializarCascadaDomicilio();
+  inicializarPredioYTenencia();
 });
 
 // ==============================================================================
@@ -116,6 +138,9 @@ let marcadorUbicacionGPS = null;
 let modoDibujoActivo = false;
 
 document.addEventListener("DOMContentLoaded", () => {
+  const contenedorMapa = document.getElementById("mapaLote");
+  if (!contenedorMapa) return;
+
   map = L.map("mapaLote").setView([-28.5, -57.8], 7);
 
   capaSatelite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
@@ -128,6 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     maxZoom: 18
   });
 
+  // Conmutador de capas satelital e IGN
   document.getElementById("btnCapaSatelite").addEventListener("click", () => {
     map.removeLayer(capaIGN);
     map.addLayer(capaSatelite);
@@ -158,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Geolocalización del dispositivo
   document.getElementById("btnDetectarUbicacion").addEventListener("click", () => {
     if (!navigator.geolocation) {
       alert("Tu dispositivo no soporta geolocalización.");
@@ -187,6 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
 
+  // Panel plegable de coordenadas
   document.getElementById("btnAbrirCargarCoords").addEventListener("click", () => {
     const caja = document.getElementById("cajaCargarCoords");
     caja.style.display = caja.style.display === "none" ? "block" : "none";
@@ -242,7 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btnBorrarDibujo").addEventListener("click", limpiarTodoElMapa);
-  document.getElementById("btnQuitarTodo").addEventListener("click", limpiarTodoElMapa);
 
   document.getElementById("btnAjustarEsquinas").addEventListener("click", () => {
     activarVerticesArrastrables();
@@ -396,7 +423,7 @@ function limpiarTodoElMapa() {
 }
 
 // ==============================================================================
-// 3. GENERADOR SILENCIOSO DE PDF EN MEMORIA
+// 3. GENERADOR DE PDF EN MEMORIA (JSPDF + AUTOTABLE)
 // ==============================================================================
 function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
   const { jsPDF } = window.jspdf;
@@ -458,7 +485,7 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 65 } }
   });
 
-  // TABLA 2: DOMICILIO (Sin Paraje, Sección, C.P. ni Barrio)
+  // TABLA 2: DOMICILIO
   const locDetalle = `${data.domicilio_municipio || "-"}, Depto: ${data.domicilio_depto || "-"}`;
 
   doc.autoTable({
@@ -513,7 +540,7 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
 }
 
 // ==============================================================================
-// 4. SUBMIT DEL FORMULARIO
+// 4. ENVÍO DEL FORMULARIO
 // ==============================================================================
 document.getElementById("arrozForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -601,7 +628,6 @@ function validarSeccion(sectionElement, badgeId) {
     }
   }
 
-  // Si no hay campos requeridos o hay campos requeridos vacíos, se considera incompleto
   if (camposRequeridosContados > 0 && camposCompletosContados < camposRequeridosContados) {
     tieneCamposVacios = true;
   }
@@ -642,7 +668,7 @@ function inicializarControlBadges() {
 }
 
 // ==============================================================================
-// BASE DE DATOS GEOGRÁFICA Y CASCADA DINÁMICA DE DOMICILIO
+// 6. BASE DE DATOS GEOGRÁFICA Y CASCADA DINÁMICA DE DOMICILIO
 // ==============================================================================
 const PAISES_MUNDO = [
   "Afganistán", "Albania", "Alemania", "Andorra", "Angola", "Antigua y Barbuda", "Arabia Saudita", "Argelia", "Argentina",
@@ -724,9 +750,9 @@ function inicializarCascadaDomicilio() {
     const esArg = selectPais.value === "Argentina";
 
     if (esArg) {
-      // Reestablecer Provincias como select
       contProv.innerHTML = `<label for="domicilio_provincia">Provincia *</label><select name="domicilio_provincia" id="domicilio_provincia" required></select>`;
       const selProv = document.getElementById("domicilio_provincia");
+
       PROVINCIAS_ARG.sort((a, b) => a.localeCompare("es")).forEach((p) => {
         const opt = document.createElement("option");
         opt.value = p;
@@ -735,12 +761,10 @@ function inicializarCascadaDomicilio() {
         selProv.appendChild(opt);
       });
 
-      // Configurar Departamentos y Municipios para Argentina
       configurarCamposSegunProvincia();
       selProv.addEventListener("change", configurarCamposSegunProvincia);
 
     } else {
-      // Para cualquier otro país, pasan a campos de texto libre
       contProv.innerHTML = `<label for="domicilio_provincia">Provincia / Estado / Región *</label><input type="text" name="domicilio_provincia" id="domicilio_provincia" required>`;
       contDepto.innerHTML = `<label for="domicilio_depto">Departamento / Condado *</label><input type="text" name="domicilio_depto" id="domicilio_depto" required>`;
       contMuni.innerHTML = `<label for="domicilio_municipio">Municipio / Ciudad *</label><input type="text" name="domicilio_municipio" id="domicilio_municipio" required>`;
@@ -755,7 +779,6 @@ function inicializarCascadaDomicilio() {
     const esCorrientes = selProv && selProv.value === "Corrientes";
 
     if (esCorrientes) {
-      // Departamento en select oficial de Corrientes
       contDepto.innerHTML = `<label for="domicilio_depto">Departamento *</label><select name="domicilio_depto" id="domicilio_depto" required></select>`;
       const selDepto = document.getElementById("domicilio_depto");
 
@@ -771,7 +794,6 @@ function inicializarCascadaDomicilio() {
         selDepto.appendChild(opt);
       });
 
-      // Municipio en select condicional
       contMuni.innerHTML = `<label for="domicilio_municipio">Municipio *</label><select name="domicilio_municipio" id="domicilio_municipio" required><option value="">Elegir departamento primero...</option></select>`;
       const selMuni = document.getElementById("domicilio_municipio");
 
@@ -803,7 +825,6 @@ function inicializarCascadaDomicilio() {
       });
 
     } else {
-      // Si eligió otra provincia argentina
       contDepto.innerHTML = `<label for="domicilio_depto">Departamento / Partido *</label><input type="text" name="domicilio_depto" id="domicilio_depto" required>`;
       contMuni.innerHTML = `<label for="domicilio_municipio">Municipio / Localidad *</label><input type="text" name="domicilio_municipio" id="domicilio_municipio" required>`;
     }
@@ -814,4 +835,190 @@ function inicializarCascadaDomicilio() {
 
   selectPais.addEventListener("change", configurarCamposSegunPais);
   configurarCamposSegunPais();
+}
+
+// ==============================================================================
+// 7. SECCIÓN PREDIO, TENENCIA Y MÁSCARAS ESTRICTAS (PARTIDAS Y RENSPA)
+// ==============================================================================
+function inicializarPredioYTenencia() {
+  const selDepto = document.getElementById("departamento");
+  const selMuni = document.getElementById("municipio");
+  const contenedorPartidas = document.getElementById("contenedorPartidas");
+  const btnAgregar = document.getElementById("btnAgregarPartida");
+  const inputRenspa = document.getElementById("renspa");
+
+  // 1. Formateador con máscara estricta para Partida: L# ######-# (ej: A3 242432-4)
+  function aplicarMascaraPartida(input) {
+    input.setAttribute("maxlength", "11");
+    input.setAttribute("placeholder", "Ej: A3 242432-4");
+
+    input.addEventListener("input", (e) => {
+      let val = e.target.value;
+      if (!val) return;
+
+      let primerLetra = val.charAt(0).toUpperCase();
+      if (!/[A-ZÑ]/.test(primerLetra)) {
+        e.target.value = "";
+        return;
+      }
+
+      let restoNumeros = val.slice(1).replace(/\D/g, "").slice(0, 8);
+      let resultado = primerLetra;
+
+      if (restoNumeros.length > 0) {
+        resultado += restoNumeros.charAt(0);
+      }
+      if (restoNumeros.length > 1) {
+        resultado += " " + restoNumeros.slice(1, 7);
+      }
+      if (restoNumeros.length > 7) {
+        resultado += "-" + restoNumeros.charAt(7);
+      }
+
+      e.target.value = resultado;
+
+      const sec4 = document.getElementById("sec-4");
+      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+    });
+  }
+
+  const primerInputPartida = document.querySelector(".input-partida");
+  if (primerInputPartida) {
+    aplicarMascaraPartida(primerInputPartida);
+  }
+
+  // 2. Cascada de Departamento y Municipio del Predio
+  if (selDepto && selMuni && typeof DEPTOS_Y_MUNICIPIOS_CORRIENTES !== "undefined") {
+    selDepto.innerHTML = `<option value="">Seleccionar departamento...</option>`;
+    Object.keys(DEPTOS_Y_MUNICIPIOS_CORRIENTES).sort((a, b) => a.localeCompare("es")).forEach((depto) => {
+      const opt = document.createElement("option");
+      opt.value = depto;
+      opt.textContent = depto;
+      selDepto.appendChild(opt);
+    });
+
+    selDepto.addEventListener("change", () => {
+      const deptoElegido = selDepto.value;
+      selMuni.innerHTML = "";
+
+      if (deptoElegido && DEPTOS_Y_MUNICIPIOS_CORRIENTES[deptoElegido]) {
+        const optDef = document.createElement("option");
+        optDef.value = "";
+        optDef.textContent = "Seleccionar municipio...";
+        selMuni.appendChild(optDef);
+
+        DEPTOS_Y_MUNICIPIOS_CORRIENTES[deptoElegido].forEach((muni) => {
+          const opt = document.createElement("option");
+          opt.value = muni;
+          opt.textContent = muni;
+          selMuni.appendChild(opt);
+        });
+      } else {
+        const optNone = document.createElement("option");
+        optNone.value = "";
+        optNone.textContent = "Elegir departamento primero...";
+        selMuni.appendChild(optNone);
+      }
+
+      const sec4 = document.getElementById("sec-4");
+      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+    });
+  }
+
+  // 3. Manejo dinámico de Partidas y Tenencia con opciones exactas
+  if (btnAgregar && contenedorPartidas) {
+    const opcionesTenenciaHTML = `
+      <option value="">Seleccionar...</option>
+      <option value="P — Propietario">P — Propietario</option>
+      <option value="S — Sucesión indivisa">S — Sucesión indivisa</option>
+      <option value="A — Arrendatario">A — Arrendatario</option>
+      <option value="AP — Aparcería">AP — Aparcería</option>
+      <option value="CA — Contrato accidental">CA — Contrato accidental</option>
+      <option value="OP — Ocupación con permiso">OP — Ocupación con permiso</option>
+      <option value="OH — Ocupación de hecho">OH — Ocupación de hecho</option>
+      <option value="OG — Ocupación gratuita">OG — Ocupación gratuita</option>
+      <option value="O — Otros">O — Otros</option>
+    `;
+
+    function actualizarNumeracionPartidas() {
+      const bloques = contenedorPartidas.querySelectorAll(".item-bloque-partida");
+      bloques.forEach((bloque, idx) => {
+        const num = idx + 1;
+        bloque.setAttribute("data-partida-index", num);
+        const lblTenencia = bloque.querySelector(".label-tenencia-dinamica");
+        if (lblTenencia) {
+          lblTenencia.textContent = `Tenencia de la partida ${num}`;
+        }
+      });
+    }
+
+    btnAgregar.addEventListener("click", () => {
+      const totalActual = contenedorPartidas.querySelectorAll(".item-bloque-partida").length;
+      const nuevoIndice = totalActual + 1;
+
+      const filaExtra = document.createElement("div");
+      filaExtra.className = "item-bloque-partida item-bloque-partida-extra";
+      filaExtra.setAttribute("data-partida-index", nuevoIndice);
+      filaExtra.innerHTML = `
+        <div class="grid-partida-superficie">
+          <div class="input-group">
+            <label>Número de partida</label>
+            <input type="text" name="partida_numero[]" class="input-partida" required>
+          </div>
+          <div class="input-group">
+            <label>Superficie (ha)</label>
+            <input type="number" step="any" name="partida_superficie[]" class="input-superficie" required>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="label-tenencia-dinamica">Tenencia de la partida ${nuevoIndice}</label>
+          <select name="partida_tenencia[]" class="select-tenencia" required>
+            ${opcionesTenenciaHTML}
+          </select>
+        </div>
+
+        <div class="quitar-partida-row">
+          <button type="button" class="btn-quitar-map">Quitar</button>
+        </div>
+      `;
+
+      const inputNuevo = filaExtra.querySelector(".input-partida");
+      if (inputNuevo) {
+        aplicarMascaraPartida(inputNuevo);
+      }
+
+      filaExtra.querySelector(".btn-quitar-map").addEventListener("click", () => {
+        filaExtra.remove();
+        actualizarNumeracionPartidas();
+        const sec4 = document.getElementById("sec-4");
+        if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+      });
+
+      contenedorPartidas.appendChild(filaExtra);
+
+      const sec4 = document.getElementById("sec-4");
+      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+    });
+  }
+
+  // 4. Máscara automática para RENSPA (XX.XXX.X.XXXXX/XX)
+  if (inputRenspa) {
+    inputRenspa.addEventListener("input", (e) => {
+      let v = e.target.value.replace(/\D/g, "");
+      if (v.length > 13) v = v.slice(0, 13);
+
+      let formatted = "";
+      if (v.length > 0) formatted += v.slice(0, 2);
+      if (v.length > 2) formatted += "." + v.slice(2, 5);
+      if (v.length > 5) formatted += "." + v.slice(5, 6);
+      if (v.length > 6) formatted += "." + v.slice(6, 11);
+      if (v.length > 11) formatted += "/" + v.slice(11, 13);
+
+      e.target.value = formatted;
+
+      const sec4 = document.getElementById("sec-4");
+      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+    });
+  }
 }
