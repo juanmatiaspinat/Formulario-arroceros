@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DDJJ Arroceros - Ministerio de Producción Corrientes</title>
   <link rel="stylesheet" href="styles.css">
 
@@ -36,10 +36,38 @@
       <div class="linea-separadora-header"></div>
     </header>
 
-    <!-- Caja de ayuda superior -->
-    <div class="box-help">
-      <span class="icon">?</span>
-      <span>Completá los datos del establecimiento y la producción para presentar la declaración jurada.</span>
+    <!-- Acordeón de Ayuda General del Formulario -->
+    <div class="box-help-accordion" id="boxDocAyudaGeneral" style="margin-bottom: 24px;">
+      <div class="box-help-header" id="btnToggleDocAyudaGeneral" role="button" tabindex="0">
+        <div class="box-help-left">
+          <span class="icon-help">?</span>
+          <div>
+            <strong class="box-help-title">¿Cómo completar esta Declaración Jurada?</strong>
+            <span class="box-help-sub">Tocá acá para ver las recomendaciones generales antes de comenzar</span>
+          </div>
+        </div>
+        <span class="chevron-icon" id="flechaAyudaGeneral">▼</span>
+      </div>
+
+      <div class="box-help-content" id="contenidoDocAyudaGeneral">
+        <div class="help-item">
+          <strong>Carácter formal del trámite</strong>
+          <p>Esta presentación posee carácter de declaración jurada oficial según Decreto Ley Nº 212/01 para la
+            percepción del canon de agua y certificación de emprendimientos arroceros.</p>
+        </div>
+
+        <div class="help-item">
+          <strong>Seguimiento por secciones</strong>
+          <p>Completá cada bloque del formulario. Los indicadores de estado (naranja/verde) en el margen superior de
+            cada tarjeta te confirmarán si los campos requeridos están en regla.</p>
+        </div>
+
+        <div class="help-item">
+          <strong>Comprobante de presentación</strong>
+          <p>Al enviar el formulario, el sistema generará automáticamente un número de comprobante oficial y archivará
+            el trámite en la Dirección de Economía Agraria.</p>
+        </div>
+      </div>
     </div>
 
     <!-- Pantalla de confirmación de éxito -->
@@ -88,32 +116,28 @@
 
           <div class="box-help-content" id="contenidoDocAyuda">
             <div class="help-item">
-              <strong>DNI y CUIT van sin guiones ni puntos</strong>
-              <p>Los números de DNI y CUIT o CUIL se escriben sin espacios y sin puntos. El sistema agrega los guiones y
-                los puntos automáticamente.</p>
+              <strong>DNI, CUIT o CUIL sin puntos ni guiones</strong>
+              <p>Los números de documento y CUIT/CUIL se ingresan únicamente con números. El sistema añade el formato y
+                los guiones de forma automática.</p>
             </div>
 
             <div class="help-item">
-              <strong>DNI, CUIT o CUIL de personas físicas</strong>
-              <p>El documento de identidad y el CUIT o CUIL. El CUIL figura en el recibo de sueldo y en la constancia de
-                ARCA; el CUIT, en la constancia de inscripción.</p>
+              <strong>Persona Física</strong>
+              <p>Tené a mano tu Documento Nacional de Identidad y la constancia de CUIT o CUIL (disponible en ARCA o
+                recibo de sueldo).</p>
             </div>
 
             <div class="help-item">
-              <strong>Personas jurídicas</strong>
-              <p>Si el campo está a nombre de una sociedad, corresponde elegir «jurídica». En ese caso se piden la razón
-                social y el CUIT de la sociedad, además del CUIL de la persona que completa el formulario.</p>
+              <strong>Persona Jurídica (Empresas o Sociedades)</strong>
+              <p>Si el establecimiento está a nombre de una sociedad o firma comercial, seleccioná «Jurídica». Se
+                requerirá la Razón Social, CUIT de la empresa, los datos del declarante y el carácter con el que firma.
+              </p>
             </div>
 
             <div class="help-item">
-              <strong>RENSPA</strong>
-              <p>Quien no tenga el Registro Nacional Sanitario de Productores Agropecuarios puede tramitarlo en
-                www.senasa.gob.ar o en la delegación de SENASA más cercana.</p>
-            </div>
-
-            <div class="help-item">
-              <strong style="margin-bottom: 0;">Debe contar con al menos un número de teléfono y un correo
-                electrónico</strong>
+              <strong>Validación obligatoria de identidad</strong>
+              <p>Asegurate de que los números coincidan exactamente con la constancia oficial para evitar observaciones
+                en la declaración jurada.</p>
             </div>
           </div>
         </div>
@@ -257,6 +281,33 @@
           </span>
         </div>
 
+        <!-- Acordeón de Ayuda: Contacto -->
+        <div class="box-help-accordion" id="boxDocAyudaContacto">
+          <div class="box-help-header" id="btnToggleDocAyudaContacto" role="button" tabindex="0">
+            <div class="box-help-left">
+              <span class="icon-help">?</span>
+              <div>
+                <strong class="box-help-title">¿Qué datos de contacto debo informar?</strong>
+                <span class="box-help-sub">Tocá acá para ver las instrucciones y requisitos</span>
+              </div>
+            </div>
+            <span class="chevron-icon" id="flechaAyudaContacto">▼</span>
+          </div>
+
+          <div class="box-help-content" id="contenidoDocAyudaContacto">
+            <div class="help-item">
+              <strong>Canales oficiales de aviso</strong>
+              <p>Con un teléfono y un correo electrónico alcanza. Sí conviene que estén disponibles y activos: es por
+                donde el Ministerio de Producción avisa si la declaración jurada necesita alguna corrección.</p>
+            </div>
+            <div class="help-item">
+              <strong>Teléfono principal</strong>
+              <p>Cargá el número con su código de área (sin 0 ni 15) para permitir una comunicación directa en caso de
+                requerirse.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="grid-2">
           <div class="input-group">
             <label for="telefono1">Teléfono Principal *</label>
@@ -287,6 +338,38 @@
             </span>
             <span class="badge-txt">Incompleto</span>
           </span>
+        </div>
+
+        <!-- Acordeón de Ayuda: Domicilio -->
+        <div class="box-help-accordion" id="boxDocAyudaDomicilio">
+          <div class="box-help-header" id="btnToggleDocAyudaDomicilio" role="button" tabindex="0">
+            <div class="box-help-left">
+              <span class="icon-help">?</span>
+              <div>
+                <strong class="box-help-title">¿Qué domicilio corresponde cargar?</strong>
+                <span class="box-help-sub">Tocá acá para ver las instrucciones y requisitos</span>
+              </div>
+            </div>
+            <span class="chevron-icon" id="flechaAyudaDomicilio">▼</span>
+          </div>
+
+          <div class="box-help-content" id="contenidoDocAyudaDomicilio">
+            <div class="help-item">
+              <strong>Es donde llegan las notificaciones</strong>
+              <p>Conviene el domicilio donde la persona o empresa recibe correspondencia, que no siempre es el del campo
+                o lote arrocero.</p>
+            </div>
+            <div class="help-item">
+              <strong>Un domicilio rural no necesita calle</strong>
+              <p>Si vivís en el campo, alcanza con indicar el departamento y el paraje o ruta de referencia. No es
+                obligatorio indicar número de puerta si no posee.</p>
+            </div>
+            <div class="help-item">
+              <strong>Productores de otras provincias</strong>
+              <p>Si residís o tenés sede fiscal fuera de Corrientes, seleccioná la provincia o país correspondiente en
+                los desplegables.</p>
+            </div>
+          </div>
         </div>
 
         <!-- Fila 1: Tipo de domicilio, País y Provincia -->
@@ -347,6 +430,42 @@
             </span>
             <span class="badge-txt">Incompleto</span>
           </span>
+        </div>
+
+        <!-- Acordeón de Ayuda: Predio y Tenencia -->
+        <div class="box-help-accordion" id="boxDocAyudaPredio">
+          <div class="box-help-header" id="btnToggleDocAyudaPredio" role="button" tabindex="0">
+            <div class="box-help-left">
+              <span class="icon-help">?</span>
+              <div>
+                <strong class="box-help-title">¿Cómo declarar las partidas y el predio?</strong>
+                <span class="box-help-sub">Tocá acá para ver las instrucciones y requisitos</span>
+              </div>
+            </div>
+            <span class="chevron-icon" id="flechaAyudaPredio">▼</span>
+          </div>
+
+          <div class="box-help-content" id="contenidoDocAyudaPredio">
+            <div class="help-item">
+              <strong>Ubicación del establecimiento</strong>
+              <p>Seleccioná el departamento y el municipio donde está radicado el predio productivo.</p>
+            </div>
+            <div class="help-item">
+              <strong>Formato de Partida Inmobiliaria</strong>
+              <p>Ingresá la partida con formato oficial (ej.: A3 242432-4). Si el establecimiento abarca más de una
+                partida, usá el botón «Agregar otra partida».</p>
+            </div>
+            <div class="help-item">
+              <strong>Régimen de tenencia</strong>
+              <p>Indicá si sos propietario, arrendatario, aparcero u otra condición legal respecto a cada partida
+                declarada.</p>
+            </div>
+            <div class="help-item">
+              <strong>Número de RENSPA</strong>
+              <p>El Registro Nacional Sanitario de Productores Agropecuarios debe ingresarse con sus trece dígitos
+                numéricos.</p>
+            </div>
+          </div>
         </div>
 
         <!-- Fila 1: Departamento y Municipio en Cascada Dinámica -->
@@ -439,6 +558,36 @@
           </span>
         </div>
 
+        <!-- Acordeón de Ayuda: Producción -->
+        <div class="box-help-accordion" id="boxDocAyudaProduccion">
+          <div class="box-help-header" id="btnToggleDocAyudaProduccion" role="button" tabindex="0">
+            <div class="box-help-left">
+              <span class="icon-help">?</span>
+              <div>
+                <strong class="box-help-title">¿Cómo declarar las superficies y fechas de campaña?</strong>
+                <span class="box-help-sub">Tocá acá para ver las instrucciones y requisitos</span>
+              </div>
+            </div>
+            <span class="chevron-icon" id="flechaAyudaProduccion">▼</span>
+          </div>
+
+          <div class="box-help-content" id="contenidoDocAyudaProduccion">
+            <div class="help-item">
+              <strong>Superficie total y destinada</strong>
+              <p>Consigná las hectáreas totales afectadas a la actividad arrocera en el establecimiento.</p>
+            </div>
+            <div class="help-item">
+              <strong>Superficie sembrada, regada y cosechada</strong>
+              <p>Informá los valores en hectáreas correspondientes a la campaña actual. En caso de no haber iniciado
+                cosecha aún, podés dejar 0 o el valor estimado.</p>
+            </div>
+            <div class="help-item">
+              <strong>Fecha de siembra y campaña agrícola</strong>
+              <p>Indicá la fecha aproximada de inicio de labor y la campaña a la que corresponde la declaración.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Fila 1: Superficie Destinada y Superficie Sembrada -->
         <div class="grid-2">
           <div class="input-group">
@@ -490,14 +639,51 @@
         <div class="map-header">
           <div class="map-title-row">
             <span class="map-title">Ubicación del lote</span>
-            <a href="#" class="map-help-link" onclick="return false;">
-              <span class="icon-help">?</span> Cómo marcar el lote en el mapa
-            </a>
           </div>
 
           <div class="map-layer-selector">
             <button type="button" id="btnCapaSatelite" class="layer-btn active">Satélite</button>
             <button type="button" id="btnCapaIGN" class="layer-btn">Mapa IGN</button>
+          </div>
+        </div>
+
+        <!-- Acordeón de Ayuda: Cómo marcar el lote -->
+        <div class="box-help-accordion" id="boxDocAyudaMapa">
+          <div class="box-help-header" id="btnToggleDocAyudaMapa" role="button" tabindex="0">
+            <div class="box-help-left">
+              <span class="icon-help">?</span>
+              <div>
+                <strong class="box-help-title">¿Cómo marcar el lote en el mapa?</strong>
+                <span class="box-help-sub">Tocá acá para ver las instrucciones y herramientas</span>
+              </div>
+            </div>
+            <span class="chevron-icon" id="flechaAyudaMapa">▼</span>
+          </div>
+
+          <div class="box-help-content" id="contenidoDocAyudaMapa">
+            <div class="help-item">
+              <strong>Dibujar manualmente el contorno</strong>
+              <p>Hacé clic en «Dibujar el lote» y tocá cada esquina sobre la imagen satelital. Para cerrar la figura,
+                hacé clic sobre el primer vértice (círculo verde) o hacé doble clic.</p>
+            </div>
+
+            <div class="help-item">
+              <strong>Cargar coordenadas geográficas</strong>
+              <p>Si contás con las coordenadas GPS del campo (latitud y longitud), podés pegarlas en la herramienta
+                «Cargar coordenadas» para ubicar o delimitar el lote automáticamente.</p>
+            </div>
+
+            <div class="help-item">
+              <strong>Ajustar esquinas o corregir</strong>
+              <p>Una vez trazado el lote, podés arrastrar cualquiera de sus esquinas para mayor precisión o usar «Borrar
+                el dibujo» para iniciar el trazado nuevamente.</p>
+            </div>
+
+            <div class="help-item">
+              <strong>Carácter orientativo y opcional</strong>
+              <p>El dibujo en el mapa no reemplaza la superficie declarada en la sección anterior; sirve como referencia
+                geoespacial para la evaluación del Ministerio.</p>
+            </div>
           </div>
         </div>
 

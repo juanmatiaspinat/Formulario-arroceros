@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Desplegable de Ayuda: ¿Qué documentación tener a mano?
+  // Desplegable de Ayuda: Sección 1 ¿Qué documentación tener a mano?
   const btnToggleAyuda = document.getElementById("btnToggleDocAyuda");
   const contenidoAyuda = document.getElementById("contenidoDocAyuda");
   const flechaAyuda = document.getElementById("flechaAyuda");
@@ -115,6 +115,78 @@ document.addEventListener("DOMContentLoaded", () => {
     btnToggleAyuda.addEventListener("click", () => {
       contenidoAyuda.classList.toggle("abierto");
       if (flechaAyuda) flechaAyuda.classList.toggle("rotada");
+    });
+  }
+
+  // Desplegable de Ayuda: Sección 2 (Contacto)
+  const btnAyudaContacto = document.getElementById("btnToggleDocAyudaContacto");
+  const contAyudaContacto = document.getElementById("contenidoDocAyudaContacto");
+  const flechaContacto = document.getElementById("flechaAyudaContacto");
+
+  if (btnAyudaContacto && contAyudaContacto) {
+    btnAyudaContacto.addEventListener("click", () => {
+      contAyudaContacto.classList.toggle("abierto");
+      if (flechaContacto) flechaContacto.classList.toggle("rotada");
+    });
+  }
+
+  // Desplegable de Ayuda: Sección 3 (Domicilio)
+  const btnAyudaDomicilio = document.getElementById("btnToggleDocAyudaDomicilio");
+  const contAyudaDomicilio = document.getElementById("contenidoDocAyudaDomicilio");
+  const flechaDomicilio = document.getElementById("flechaAyudaDomicilio");
+
+  if (btnAyudaDomicilio && contAyudaDomicilio) {
+    btnAyudaDomicilio.addEventListener("click", () => {
+      contAyudaDomicilio.classList.toggle("abierto");
+      if (flechaDomicilio) flechaDomicilio.classList.toggle("rotada");
+    });
+  }
+
+  // Desplegable de Ayuda: Sección 4 (Predio y Tenencia)
+  const btnAyudaPredio = document.getElementById("btnToggleDocAyudaPredio");
+  const contAyudaPredio = document.getElementById("contenidoDocAyudaPredio");
+  const flechaPredio = document.getElementById("flechaAyudaPredio");
+
+  if (btnAyudaPredio && contAyudaPredio) {
+    btnAyudaPredio.addEventListener("click", () => {
+      contAyudaPredio.classList.toggle("abierto");
+      if (flechaPredio) flechaPredio.classList.toggle("rotada");
+    });
+  }
+
+  // Desplegable de Ayuda: Sección 5 (Producción)
+  const btnAyudaProduccion = document.getElementById("btnToggleDocAyudaProduccion");
+  const contAyudaProduccion = document.getElementById("contenidoDocAyudaProduccion");
+  const flechaProduccion = document.getElementById("flechaAyudaProduccion");
+
+  if (btnAyudaProduccion && contAyudaProduccion) {
+    btnAyudaProduccion.addEventListener("click", () => {
+      contAyudaProduccion.classList.toggle("abierto");
+      if (flechaProduccion) flechaProduccion.classList.toggle("rotada");
+    });
+  }
+
+  // Desplegable de Ayuda: Sección 6 (Mapa interactivo)
+  const btnAyudaMapa = document.getElementById("btnToggleDocAyudaMapa");
+  const contAyudaMapa = document.getElementById("contenidoDocAyudaMapa");
+  const flechaMapa = document.getElementById("flechaAyudaMapa");
+
+  if (btnAyudaMapa && contAyudaMapa) {
+    btnAyudaMapa.addEventListener("click", () => {
+      contAyudaMapa.classList.toggle("abierto");
+      if (flechaMapa) flechaMapa.classList.toggle("rotada");
+    });
+  }
+
+  // Desplegable de Ayuda: General (Encabezado)
+  const btnAyudaGeneral = document.getElementById("btnToggleDocAyudaGeneral");
+  const contAyudaGeneral = document.getElementById("contenidoDocAyudaGeneral");
+  const flechaGeneral = document.getElementById("flechaAyudaGeneral");
+
+  if (btnAyudaGeneral && contAyudaGeneral) {
+    btnAyudaGeneral.addEventListener("click", () => {
+      contAyudaGeneral.classList.toggle("abierto");
+      if (flechaGeneral) flechaGeneral.classList.toggle("rotada");
     });
   }
 
@@ -280,6 +352,10 @@ function iniciarModoDibujo() {
   limpiarTodoElMapa();
   modoDibujoActivo = true;
   document.getElementById("mapaInstruccion").innerText = "Hacé clic en el mapa para marcar las esquinas. Tocá el primer punto (círculo verde) para cerrar el lote.";
+
+  // Activa el cursor de precisión en el mapa
+  const contMapa = document.getElementById("mapaLote");
+  if (contMapa) contMapa.classList.add("mapa-modo-dibujo");
 }
 
 function agregarVertice(lat, lng) {
@@ -325,6 +401,10 @@ function agregarVertice(lat, lng) {
 
 function cerrarPoligono(hectareasForzadas) {
   modoDibujoActivo = false;
+
+  // Remueve el cursor de dibujo y vuelve al cursor habitual
+  const contMapa = document.getElementById("mapaLote");
+  if (contMapa) contMapa.classList.remove("mapa-modo-dibujo");
 
   if (polylineTemporal) {
     map.removeLayer(polylineTemporal);
@@ -405,7 +485,12 @@ function calcularHectareas(coords) {
 }
 
 function limpiarTodoElMapa() {
+  // Remueve el cursor de dibujo si estaba activo
+  const contMapa = document.getElementById("mapaLote");
+  if (contMapa) contMapa.classList.remove("mapa-modo-dibujo");
+
   if (polygonLayer) map.removeLayer(polygonLayer);
+  polygonLayer = null;
   polygonLayer = null;
   if (polylineTemporal) map.removeLayer(polylineTemporal);
   polylineTemporal = null;
