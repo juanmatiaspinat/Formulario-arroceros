@@ -327,7 +327,7 @@
            ==================================================================== -->
       <section class="form-section" id="sec-3">
         <div class="section-header-row">
-          <span class="section-title">3. Domicilio (Particular o Legal)</span>
+          <span class="section-title">3. Domicilio <span class="subtitulo-seccion">(Particular o Legal)</span></span>
           <span class="status-badge incompleto" id="badge-sec-3">
             <span class="badge-icon">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
@@ -450,16 +450,21 @@
               <strong>Ubicación del establecimiento</strong>
               <p>Seleccioná el departamento y el municipio donde está radicado el predio productivo.</p>
             </div>
+
             <div class="help-item">
-              <strong>Formato de Partida Inmobiliaria</strong>
-              <p>Ingresá la partida con formato oficial (ej.: A3 242432-4). Si el establecimiento abarca más de una
-                partida, usá el botón «Agregar otra partida».</p>
+              <strong>Formato de Partida Inmobiliaria (Adrema)</strong>
+              <p>Completá con los 6 números de tu partida y el dígito final (ej.: Q1 242432-3), que clasifica el tipo de
+                inmueble:</p>
+              <p><strong>1</strong>: Urbano | <strong>2</strong>: Suburbano | <strong>3</strong>: Rural</p>
+              <p>Si el establecimiento comprende más de una partida, sumala con el botón «Agregar otra partida».</p>
             </div>
+
             <div class="help-item">
               <strong>Régimen de tenencia</strong>
               <p>Indicá si sos propietario, arrendatario, aparcero u otra condición legal respecto a cada partida
                 declarada.</p>
             </div>
+
             <div class="help-item">
               <strong>Número de RENSPA</strong>
               <p>El Registro Nacional Sanitario de Productores Agropecuarios debe ingresarse con sus trece dígitos
@@ -493,8 +498,8 @@
           <div class="item-bloque-partida" data-partida-index="1">
             <div class="grid-partida-superficie">
               <div class="input-group">
-                <label>Número de partida</label>
-                <input type="text" name="partida_numero[]" class="input-partida" required>
+                <label>Número de partida (Adrema)</label>
+                <input type="text" name="partida_numero[]" class="input-partida" placeholder="Ej: Q1 242432-1" required>
               </div>
 
               <div class="input-group">
@@ -535,8 +540,9 @@
         <!-- Fila Final: RENSPA -->
         <div class="input-group" style="max-width: 380px; margin-top: 10px;">
           <label for="renspa">RENSPA *</label>
-          <input type="text" name="renspa" id="renspa" class="input-renspa" maxlength="17" required>
-          <small>Trece dígitos. Formato oficial 01.002.0.00255/00.</small>
+          <input type="text" name="renspa" id="renspa" class="input-renspa" placeholder="04.000.0.00000/00"
+            maxlength="17" pattern="^04\.\d{3}\.\d{1}\.\d{5}\/\d{2}$" required>
+          <small>Trece dígitos. Formato oficial 04.004.1.23123/21.</small>
         </div>
       </section>
 

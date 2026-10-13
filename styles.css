@@ -821,6 +821,39 @@ body {
   }
 }
 
+/* Asegura que los textos y números dentro del texto de ayuda no salten de línea */
+.help-item p strong,
+.help-item p span {
+  display: inline !important;
+  font-weight: 700;
+}
+
+/* Campos obligatorios o con formato inválido (vacíos o a medio completar) */
+.input-partida:invalid,
+input[required]:invalid,
+select[required]:invalid {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+/* Campos completados correctamente */
+.input-partida:valid,
+input[required]:valid,
+select[required]:valid {
+  border-color: #cbd5e1 !important;
+  background-color: #ffffff !important;
+}
+
+/* Cuando el usuario hace foco en el campo para escribir, se quita la rigidez del rojo */
+.input-partida:focus,
+input[required]:focus,
+select[required]:focus {
+  border-color: #2563eb !important;
+  background-color: #ffffff !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
 /* ==============================================================================
    CURSOR DE PRECISIÓN PARA DIBUJO DE LOTE EN MAPA
    ============================================================================== */
@@ -850,5 +883,11 @@ body {
 @media (max-width: 600px) {
   .grid-partida-superficie {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .subtitulo-seccion {
+    display: block;
   }
 }

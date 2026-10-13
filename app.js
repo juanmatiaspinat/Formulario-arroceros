@@ -11,6 +11,7 @@
  * 5. VALIDACIÓN EN TIEMPO REAL Y CONTROL DE BADGES POR SECCIÓN
  * 6. BASE DE DATOS GEOGRÁFICA Y CASCADA DE DOMICILIO
  * 7. SECCIÓN PREDIO, TENENCIA Y MÁSCARAS ESTRICTAS (PARTIDAS Y RENSPA)
+ * 8. RESTRICCIONES Y VALIDACIONES SEMÁNTICAS GLOBALES
  */
 
 // URL DEL APPS SCRIPT PUBLICADO (WEB APP)
@@ -195,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
   inicializarControlBadges();
   inicializarCascadaDomicilio();
   inicializarPredioYTenencia();
+  inicializarRestriccionesCampos();
 });
 
 // ==============================================================================
@@ -491,7 +493,6 @@ function limpiarTodoElMapa() {
 
   if (polygonLayer) map.removeLayer(polygonLayer);
   polygonLayer = null;
-  polygonLayer = null;
   if (polylineTemporal) map.removeLayer(polylineTemporal);
   polylineTemporal = null;
   marcadoresVertices.forEach(m => map.removeLayer(m));
@@ -598,7 +599,7 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
     head: [["3. PREDIO Y PRODUCCIÓN ARROCERA", "VALOR"]],
     body: [
       ["Departamento / Municipio del Predio", `${data.departamento || "-"} / ${data.municipio || "-"}`],
-      ["N° Partida Inmobiliaria", data.partida || "-"],
+      ["N° Partida Inmobiliaria (Adrema)", data.partida || "-"],
       ["Tenencia de la Partida", data.tenencia || "-"],
       ["RENSPA", data.renspa || "-"],
       ["Superficie Total Destinada (Ha)", `${data.sup_arroz || "0.0"} ha`],
@@ -629,6 +630,27 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
 // ==============================================================================
 document.getElementById("arrozForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  // Verificación global de todas las secciones antes de enviar
+  const secciones = [
+    { sec: document.getElementById("sec-1"), badge: "badge-sec-1" },
+    { sec: document.getElementById("sec-2"), badge: "badge-sec-2" },
+    { sec: document.getElementById("sec-3"), badge: "badge-sec-3" },
+    { sec: document.getElementById("sec-4"), badge: "badge-sec-4" },
+    { sec: document.getElementById("sec-5"), badge: "badge-sec-5" }
+  ];
+
+  let hayErrores = false;
+  secciones.forEach(({ sec, badge }) => {
+    if (sec && !validarSeccion(sec, badge)) {
+      hayErrores = true;
+    }
+  });
+
+  if (hayErrores) {
+    alert("Por favor revisá los campos señalados con error o incompletos antes de presentar la declaración.");
+    return;
+  }
 
   const btn = document.getElementById("btnSubmit");
   btn.disabled = true;
@@ -677,7 +699,7 @@ document.getElementById("arrozForm").addEventListener("submit", async (e) => {
 // ==============================================================================
 function validarSeccion(sectionElement, badgeId) {
   const badge = document.getElementById(badgeId);
-  if (!sectionElement || !badge) return;
+  if (!sectionElement || !badge) return false;
 
   const inputs = Array.from(sectionElement.querySelectorAll("input, select, textarea"))
     .filter(el => el.type !== "hidden" && el.offsetParent !== null && !el.disabled);
@@ -699,14 +721,56 @@ function validarSeccion(sectionElement, badgeId) {
       }
     }
 
+    // Validador nativo de HTML5
     if (val && !input.checkValidity()) {
       tieneError = true;
       break;
     }
 
+    // Validación algorítmica de CUIT / CUIL
     if (input.classList.contains("input-cuit") && val) {
       const limpio = val.replace(/\D/g, "");
-      if (limpio.length !== 11) {
+      if (limpio.length !== 11 || !validarAlgoritmoCUIT(limpio)) {
+        tieneError = true;
+        break;
+      }
+    }
+
+    // Validación de DNI
+    if (input.id === "num_doc" && val) {
+      if (!/^\d{7,8}$/.test(val)) {
+        tieneError = true;
+        break;
+      }
+    }
+
+    // Validación de Correo Electrónico
+    if (input.type === "email" && val) {
+      if (!validarFormatoEmail(val)) {
+        tieneError = true;
+        break;
+      }
+    }
+
+    // Validación de Teléfono
+    if ((input.type === "tel" || input.name?.includes("telefono")) && val) {
+      if (!validarFormatoTelefono(val)) {
+        tieneError = true;
+        break;
+      }
+    }
+
+    // Validación estricta de Partida (Adrema): Prefijo + 6 dígitos + guion + [1|2|3]
+    if (input.classList.contains("input-partida") && val) {
+      if (!/^[A-ZÑ]\d\s\d{6}-[1-3]$/i.test(val)) {
+        tieneError = true;
+        break;
+      }
+    }
+
+    // Validación estricta de RENSPA Corrientes (04.XXX.X.XXXXX/XX)
+    if (input.id === "renspa" && val) {
+      if (!/^04\.\d{3}\.\d{1}\.\d{5}\/\d{2}$/.test(val)) {
         tieneError = true;
         break;
       }
@@ -724,12 +788,15 @@ function validarSeccion(sectionElement, badgeId) {
   if (tieneError) {
     badge.className = "status-badge error";
     badge.innerHTML = `${iconoExclamacion} <span class="badge-txt">Con errores</span>`;
+    return false;
   } else if (tieneCamposVacios || camposRequeridosContados === 0) {
     badge.className = "status-badge incompleto";
     badge.innerHTML = `${iconoPuntos} <span class="badge-txt">Incompleto</span>`;
+    return false;
   } else {
     badge.className = "status-badge completo";
     badge.innerHTML = `${iconoCheck} <span class="badge-txt">Completo</span>`;
+    return true;
   }
 }
 
@@ -923,7 +990,71 @@ function inicializarCascadaDomicilio() {
 }
 
 // ==============================================================================
-// 7. SECCIÓN PREDIO, TENENCIA Y MÁSCARAS ESTRICTAS (PARTIDAS Y RENSPA)
+// MAPEO OFICIAL CATASTRAL: DEPARTAMENTO + MUNICIPIO -> CÓDIGO DE PARTIDA
+// ==============================================================================
+const CODIGOS_CATASTRO_CORRIENTES = {
+  "Alvear": { "Alvear": "T2", "Torrent": "T6", "Estación Torrent": "T6" },
+  "General Alvear": { "Alvear": "T2", "Torrent": "T6", "Estación Torrent": "T6" },
+  "Bella Vista": { "Bella Vista": "B1", "Tres de Abril": "B2" },
+  "Berón de Astrada": { "Berón de Astrada": "C1" },
+  "Capital": { "Capital": "A1", "Corrientes": "A1", "Riachuelo": "A2" },
+  "Concepción": { "Concepción del Yaguareté Corá": "D1", "Concepción": "D1", "Tabay": "D2", "Santa Rosa": "D3", "Tatacuá": "D4" },
+  "Curuzú Cuatiá": { "Curuzú Cuatiá": "E1", "Perugorría": "E2" },
+  "Empedrado": { "Empedrado": "F1", "El Sombrero": "F2", "Manuel Derqui": "F1" },
+  "Esquina": { "Esquina": "G1", "Pueblo Libertador": "G2", "Malvinas": "G1" },
+  "General Paz": { "Caá Catí": "H1", "Itá Ibaté": "H2", "Lomas de Vallejos": "H3", "Palmar Grande": "H4" },
+  "Goya": { "Goya": "I1", "Colonia Carolina": "I2", "San Isidro": "I3" },
+  "Itatí": { "Itatí": "J1", "Ramada Paso": "J2" },
+  "Ituzaingó": { "Ituzaingó": "K1", "San Carlos": "K2", "Colonia Liebig": "K3", "Villa Olivari": "K5", "Colonia San Antonio": "K6", "San Antonio de Apipé": "K6" },
+  "Lavalle": { "Santa Lucía": "L1", "Gobernador Martínez": "L2", "Lavalle": "L4", "Cruz de los Milagros": "L5", "Yataytí Calle": "L7", "Cecilio Echavarría": "L4" },
+  "Mburucuyá": { "Mburucuyá": "M1" },
+  "Mercedes": { "Mercedes": "N1", "Felipe Yofré": "N2", "Mariano I. Loza": "N3" },
+  "Monte Caseros": { "Monte Caseros": "O1", "Mocoretá": "O2", "Colonia Libertad": "O3", "Juan Pujol": "O4" },
+  "Paso de los Libres": { "Paso de los Libres": "P1", "Bonpland": "P3", "Parada Pucheta": "P4", "Tapebicuá": "P5" },
+  "Saladas": { "Saladas": "Q1", "San Lorenzo": "Q2", "Pago de los Deseos": "Q3" },
+  "San Cosme": { "San Cosme": "R1", "Santa Ana de los Guácaras": "R2", "Santa Ana": "R2", "Paso de la Patria": "R3" },
+  "San Luis del Palmar": { "San Luis del Palmar": "S1", "Herlitzka": "S2" },
+  "San Martín": { "La Cruz": "T1", "Yapeyú": "T3", "Colonia Carlos Pellegrini": "T4", "Cnia. Carlos Pellegrini": "T4", "Guaviraví": "T5" },
+  "San Miguel": { "San Miguel": "U1", "Loreto": "U2", "El Caimán": "U1" },
+  "San Roque": { "Chavarría": "V1", "9 de Julio": "V2", "San Roque": "V3", "Mantilla": "V4", "Pedro R. Fernandez": "V4", "Colonia Pando": "V5" },
+  "Santo Tomé": { "Santo Tomé": "W1", "Garruchos": "W2", "Garaví": "W2", "Gobernador Virasoro": "W3", "Jose R. Gomez": "W4" },
+  "Sauce": { "Sauce": "X1" }
+};
+
+// ==============================================================================
+// MAPEO OFICIAL SENASA RENSPA: DEPARTAMENTO -> CÓDIGO (04-XXX)
+// ==============================================================================
+const CODIGOS_RENSPA_CORRIENTES = {
+  "Bella Vista": "001",
+  "Berón de Astrada": "002",
+  "Capital": "003",
+  "Concepción": "004",
+  "Curuzú Cuatiá": "005",
+  "Empedrado": "006",
+  "Esquina": "007",
+  "General Alvear": "008",
+  "Alvear": "008",
+  "General Paz": "009",
+  "Goya": "010",
+  "Itatí": "011",
+  "Ituzaingó": "012",
+  "Lavalle": "013",
+  "Mburucuyá": "014",
+  "Mercedes": "015",
+  "Monte Caseros": "016",
+  "Paso de los Libres": "017",
+  "Saladas": "018",
+  "San Cosme": "019",
+  "San Luis del Palmar": "020",
+  "San Martín": "021",
+  "San Miguel": "022",
+  "San Roque": "023",
+  "Santo Tomé": "024",
+  "Sauce": "025"
+};
+
+// ==============================================================================
+// 7. SECCIÓN PREDIO, TENENCIA Y MÁSCARAS ESTRICTAS (PARTIDAS ADREMA Y RENSPA)
 // ==============================================================================
 function inicializarPredioYTenencia() {
   const selDepto = document.getElementById("departamento");
@@ -932,47 +1063,182 @@ function inicializarPredioYTenencia() {
   const btnAgregar = document.getElementById("btnAgregarPartida");
   const inputRenspa = document.getElementById("renspa");
 
-  // 1. Formateador con máscara estricta para Partida: L# ######-# (ej: A3 242432-4)
+  // Obtiene el prefijo oficial Adrema (ej: "Q1") según depto y municipio
+  function obtenerPrefijoActual() {
+    const depto = selDepto ? selDepto.value : "";
+    const muni = selMuni ? selMuni.value : "";
+    if (depto && muni && CODIGOS_CATASTRO_CORRIENTES[depto] && CODIGOS_CATASTRO_CORRIENTES[depto][muni]) {
+      return CODIGOS_CATASTRO_CORRIENTES[depto][muni];
+    }
+    return "";
+  }
+
+  // Obtiene el prefijo oficial SENASA (ej: "04.004.") según el departamento
+  function obtenerPrefijoRenspaActual() {
+    const depto = selDepto ? selDepto.value : "";
+    if (depto && CODIGOS_RENSPA_CORRIENTES[depto]) {
+      return `04.${CODIGOS_RENSPA_CORRIENTES[depto]}.`;
+    }
+    return "";
+  }
+
+  // Aplica la máscara estricta: [Prefijo] [6 dígitos]-[1|2|3]
   function aplicarMascaraPartida(input) {
     input.setAttribute("maxlength", "11");
-    input.setAttribute("placeholder", "Ej: A3 242432-4");
+    input.setAttribute("placeholder", "Ej: Q1 242432-1");
+    input.setAttribute("pattern", "^[A-ZÑa-zñ]\\d\\s\\d{6}-[1-3]$");
 
     input.addEventListener("input", (e) => {
       let val = e.target.value;
-      if (!val) return;
+      const prefijo = obtenerPrefijoActual();
 
-      let primerLetra = val.charAt(0).toUpperCase();
-      if (!/[A-ZÑ]/.test(primerLetra)) {
-        e.target.value = "";
-        return;
-      }
+      if (prefijo) {
+        let soloNumeros = val.toUpperCase().replace(prefijo, "").replace(/\D/g, "");
+        let resultado = prefijo;
 
-      let restoNumeros = val.slice(1).replace(/\D/g, "").slice(0, 8);
-      let resultado = primerLetra;
+        if (soloNumeros.length > 0) {
+          resultado += " " + soloNumeros.slice(0, 6);
+        }
 
-      if (restoNumeros.length > 0) {
-        resultado += restoNumeros.charAt(0);
-      }
-      if (restoNumeros.length > 1) {
-        resultado += " " + restoNumeros.slice(1, 7);
-      }
-      if (restoNumeros.length > 7) {
-        resultado += "-" + restoNumeros.charAt(7);
-      }
+        if (soloNumeros.length >= 7) {
+          const digitoFinal = soloNumeros.charAt(6);
+          if (["1", "2", "3"].includes(digitoFinal)) {
+            resultado += "-" + digitoFinal;
+          }
+        }
 
-      e.target.value = resultado;
+        e.target.value = resultado;
+      } else {
+        let primerLetra = val.charAt(0).toUpperCase();
+        if (!/[A-ZÑ]/.test(primerLetra)) {
+          e.target.value = "";
+          return;
+        }
+
+        let resto = val.slice(1).replace(/\D/g, "");
+        let resultado = primerLetra;
+
+        if (resto.length > 0) resultado += resto.charAt(0);
+        if (resto.length > 1) resultado += " " + resto.slice(1, 7);
+        if (resto.length >= 8) {
+          const digVerif = resto.charAt(7);
+          if (["1", "2", "3"].includes(digVerif)) {
+            resultado += "-" + digVerif;
+          }
+        }
+        e.target.value = resultado;
+      }
 
       const sec4 = document.getElementById("sec-4");
       if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
     });
   }
 
+  // Actualiza los inputs de partida existentes cuando cambia el municipio o depto
+  function actualizarPrefijoEnPartidas() {
+    const prefijo = obtenerPrefijoActual();
+    if (!prefijo) return;
+
+    const inputs = contenedorPartidas.querySelectorAll(".input-partida");
+    inputs.forEach((input) => {
+      let val = input.value.trim();
+      let sinPrefijo = val.replace(/^[A-ZÑ]\d\s*/i, "").trim();
+      let match = sinPrefijo.match(/^(\d{1,6})(?:-([1-3]))?$/);
+
+      if (match && match[1]) {
+        let numeros = match[1];
+        let digito = match[2] ? `-${match[2]}` : "";
+        input.value = `${prefijo} ${numeros}${digito}`;
+      } else {
+        input.value = `${prefijo} `;
+      }
+    });
+
+    const sec4 = document.getElementById("sec-4");
+    if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+  }
+
+  // Formateador estricto para RENSPA (04.XXX.X.XXXXX/XX)
+  function formatearRenspa(valorNumerico, codigoDepto) {
+    let num = valorNumerico.replace(/\D/g, "");
+
+    // Si hay código de depto seleccionado, forzamos que arranque con 04 + código
+    if (codigoDepto) {
+      const prefijoFijo = "04" + codigoDepto;
+      if (num.startsWith(prefijoFijo)) {
+        num = prefijoFijo + num.slice(prefijoFijo.length);
+      } else if (num.startsWith("04")) {
+        num = prefijoFijo + num.slice(2).replace(new RegExp("^" + codigoDepto), "");
+      } else {
+        num = prefijoFijo + num;
+      }
+    }
+
+    if (num.length > 13) num = num.slice(0, 13);
+
+    let res = "";
+    if (num.length > 0) res += num.slice(0, 2);
+    if (num.length > 2) res += "." + num.slice(2, 5);
+    if (num.length > 5) res += "." + num.slice(5, 6);
+    if (num.length > 6) res += "." + num.slice(6, 11);
+    if (num.length > 11) res += "/" + num.slice(11, 13);
+
+    return res;
+  }
+
+  // Actualiza el RENSPA al cambiar el departamento sin romper ni agregar dígitos
+  function actualizarPrefijoRenspa() {
+    if (!inputRenspa) return;
+    const depto = selDepto ? selDepto.value : "";
+    const codigoDepto = CODIGOS_RENSPA_CORRIENTES[depto] || "";
+    if (!codigoDepto) return;
+
+    let v = inputRenspa.value.replace(/\D/g, "");
+    // Si ya tenía números ingresados más allá del prefijo (más de 5 dígitos), conservamos solo el resto
+    let resto = v.length > 5 ? v.slice(5) : "";
+
+    // Si no había resto, que quede exactamente "04.XXX." para que el productor empiece a tipear
+    if (!resto) {
+      inputRenspa.value = `04.${codigoDepto}.`;
+    } else {
+      inputRenspa.value = formatearRenspa("04" + codigoDepto + resto, codigoDepto);
+    }
+
+    const sec4 = document.getElementById("sec-4");
+    if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+  }
+
+  // Máscara automática y validación de formato para RENSPA
+  if (inputRenspa) {
+    inputRenspa.setAttribute("maxlength", "17");
+    inputRenspa.setAttribute("placeholder", "04.000.0.00000/00");
+    inputRenspa.setAttribute("pattern", "^04\\.\\d{3}\\.\\d{1}\\.\\d{5}\\/\\d{2}$");
+
+    inputRenspa.addEventListener("input", (e) => {
+      const depto = selDepto ? selDepto.value : "";
+      const codigoDepto = CODIGOS_RENSPA_CORRIENTES[depto] || "";
+
+      let formateado = formatearRenspa(e.target.value, codigoDepto);
+
+      // Si solo tiene el prefijo de 5 números (04XXX), le agregamos el punto al final para comodidad
+      if (codigoDepto && formateado === `04.${codigoDepto}`) {
+        formateado = `04.${codigoDepto}.`;
+      }
+
+      e.target.value = formateado;
+
+      const sec4 = document.getElementById("sec-4");
+      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+    });
+  }
+
+  // Inicializar máscara en la primera fila de partida
   const primerInputPartida = document.querySelector(".input-partida");
   if (primerInputPartida) {
     aplicarMascaraPartida(primerInputPartida);
   }
 
-  // 2. Cascada de Departamento y Municipio del Predio
+  // Cascada de Departamento y Municipio del Predio
   if (selDepto && selMuni && typeof DEPTOS_Y_MUNICIPIOS_CORRIENTES !== "undefined") {
     selDepto.innerHTML = `<option value="">Seleccionar departamento...</option>`;
     Object.keys(DEPTOS_Y_MUNICIPIOS_CORRIENTES).sort((a, b) => a.localeCompare("es")).forEach((depto) => {
@@ -1005,12 +1271,16 @@ function inicializarPredioYTenencia() {
         selMuni.appendChild(optNone);
       }
 
-      const sec4 = document.getElementById("sec-4");
-      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+      actualizarPrefijoEnPartidas();
+      actualizarPrefijoRenspa();
+    });
+
+    selMuni.addEventListener("change", () => {
+      actualizarPrefijoEnPartidas();
     });
   }
 
-  // 3. Manejo dinámico de Partidas y Tenencia con opciones exactas
+  // Manejo dinámico de Partidas y Tenencia con etiqueta (Adrema)
   if (btnAgregar && contenedorPartidas) {
     const opcionesTenenciaHTML = `
       <option value="">Seleccionar...</option>
@@ -1040,6 +1310,7 @@ function inicializarPredioYTenencia() {
     btnAgregar.addEventListener("click", () => {
       const totalActual = contenedorPartidas.querySelectorAll(".item-bloque-partida").length;
       const nuevoIndice = totalActual + 1;
+      const prefijo = obtenerPrefijoActual();
 
       const filaExtra = document.createElement("div");
       filaExtra.className = "item-bloque-partida item-bloque-partida-extra";
@@ -1047,8 +1318,8 @@ function inicializarPredioYTenencia() {
       filaExtra.innerHTML = `
         <div class="grid-partida-superficie">
           <div class="input-group">
-            <label>Número de partida</label>
-            <input type="text" name="partida_numero[]" class="input-partida" required>
+            <label>Número de partida (Adrema)</label>
+            <input type="text" name="partida_numero[]" class="input-partida" value="${prefijo ? prefijo + ' ' : ''}" pattern="^[A-ZÑa-zñ]\\d\\s\\d{6}-[1-3]$" required>
           </div>
           <div class="input-group">
             <label>Superficie (ha)</label>
@@ -1087,23 +1358,86 @@ function inicializarPredioYTenencia() {
     });
   }
 
-  // 4. Máscara automática para RENSPA (XX.XXX.X.XXXXX/XX)
-  if (inputRenspa) {
-    inputRenspa.addEventListener("input", (e) => {
-      let v = e.target.value.replace(/\D/g, "");
-      if (v.length > 13) v = v.slice(0, 13);
+}
 
-      let formatted = "";
-      if (v.length > 0) formatted += v.slice(0, 2);
-      if (v.length > 2) formatted += "." + v.slice(2, 5);
-      if (v.length > 5) formatted += "." + v.slice(5, 6);
-      if (v.length > 6) formatted += "." + v.slice(6, 11);
-      if (v.length > 11) formatted += "/" + v.slice(11, 13);
+// ==============================================================================
+// 8. RESTRICCIONES Y VALIDACIONES SEMÁNTICAS GLOBALES
+// ==============================================================================
 
-      e.target.value = formatted;
+// Algoritmo oficial AFIP Módulo 11 para CUIT/CUIL
+function validarAlgoritmoCUIT(cuitLimpio) {
+  if (!/^\d{11}$/.test(cuitLimpio)) return false;
 
-      const sec4 = document.getElementById("sec-4");
-      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
-    });
+  const prefijosValidos = ["20", "23", "24", "27", "30", "33", "34"];
+  if (!prefijosValidos.includes(cuitLimpio.slice(0, 2))) return false;
+
+  const multiplicadores = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  let suma = 0;
+
+  for (let i = 0; i < 10; i++) {
+    suma += parseInt(cuitLimpio.charAt(i), 10) * multiplicadores[i];
   }
+
+  let digitoCalculado = 11 - (suma % 11);
+  if (digitoCalculado === 11) digitoCalculado = 0;
+  if (digitoCalculado === 10) digitoCalculado = 9;
+
+  return digitoCalculado === parseInt(cuitLimpio.charAt(10), 10);
+}
+
+// Validación de Correo Electrónico
+function validarFormatoEmail(email) {
+  const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return re.test(String(email).toLowerCase().trim());
+}
+
+// Validación de Teléfono (Argentina)
+function validarFormatoTelefono(tel) {
+  const soloNumeros = tel.replace(/\D/g, "");
+  return soloNumeros.length >= 8 && soloNumeros.length <= 13;
+}
+
+// Inicialización de restricciones y filtros en tiempo real
+function inicializarRestriccionesCampos() {
+  const inputsDni = document.querySelectorAll("#num_doc, [name='num_doc']");
+  const inputsTelefono = document.querySelectorAll("input[type='tel'], #telefono1, #telefono2, [name='telefono1'], [name='telefono2']");
+  const inputsTextoNombre = document.querySelectorAll("#productor_fisica, #declarante_juridica, #razon_social, #caracter_otro, [name='productor_fisica'], [name='declarante_juridica'], [name='razon_social']");
+  const inputsSuperficie = document.querySelectorAll("input[type='number'], .input-superficie, #sup_arroz, #sup_sembrada, #sup_regada");
+
+  // DNI: Solo números (7 u 8 dígitos)
+  inputsDni.forEach((input) => {
+    input.setAttribute("maxlength", "8");
+    input.setAttribute("inputmode", "numeric");
+    input.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 8);
+    });
+  });
+
+  // Teléfonos: Solo dígitos, espacios, guiones y '+' al comienzo
+  inputsTelefono.forEach((input) => {
+    input.setAttribute("maxlength", "18");
+    input.setAttribute("inputmode", "tel");
+    input.addEventListener("input", (e) => {
+      let val = e.target.value;
+      let tieneMas = val.startsWith("+");
+      let limpio = val.replace(/[^\d\s-]/g, "");
+      e.target.value = (tieneMas ? "+" : "") + limpio.replace(/^\+/, "");
+    });
+  });
+
+  // Nombres y Razón Social: Bloqueo de caracteres numéricos o símbolos extraños no corporativos
+  inputsTextoNombre.forEach((input) => {
+    input.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.,&'-]/g, "");
+    });
+  });
+
+  // Superficies y Hectáreas: Previene números negativos
+  inputsSuperficie.forEach((input) => {
+    input.addEventListener("input", (e) => {
+      if (parseFloat(e.target.value) < 0) {
+        e.target.value = "";
+      }
+    });
+  });
 }
