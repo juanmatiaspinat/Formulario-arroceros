@@ -116,9 +116,16 @@
 
           <div class="box-help-content" id="contenidoDocAyuda">
             <div class="help-item">
-              <strong>DNI, CUIT o CUIL sin puntos ni guiones</strong>
-              <p>Los números de documento y CUIT/CUIL se ingresan únicamente con números. El sistema añade el formato y
-                los guiones de forma automática.</p>
+              <strong>Formato del documento según el tipo</strong>
+              <p>Ingresá únicamente los números, sin puntos, espacios ni guiones:</p>
+              <p>• <strong>DNI:</strong> 7 u 8 dígitos.</p>
+              <p>• <strong>LC (Libreta Cívica) / LE (Libreta de Enrolamiento):</strong> 6 o 7 dígitos.</p>
+            </div>
+
+            <div class="help-item">
+              <strong>CUIT o CUIL sin guiones</strong>
+              <p>Los 11 dígitos se ingresan directamente con números. El sistema añade el formato y los guiones
+                automáticamente.</p>
             </div>
 
             <div class="help-item">
@@ -144,7 +151,7 @@
 
         <!-- Selector Principal: Tipo de Persona -->
         <div class="input-group" style="max-width: 380px; margin-bottom: 20px;">
-          <label for="tipo_persona">Tipo de persona *</label>
+          <label for="tipo_persona">Tipo de persona</label>
           <select name="tipo_persona" id="tipo_persona" required>
             <option value="Física" selected>Física</option>
             <option value="Jurídica">Jurídica</option>
@@ -157,31 +164,30 @@
 
           <div class="grid-2">
             <div class="input-group">
-              <label for="productor_fisica">Apellido y nombre *</label>
+              <label for="productor_fisica">Apellido y nombre</label>
               <input type="text" name="productor_fisica" id="productor_fisica">
             </div>
 
             <div class="input-group">
-              <label for="tipo_doc">Tipo de documento *</label>
-              <select name="tipo_doc" id="tipo_doc">
-                <option value="">Seleccionar...</option>
-                <option value="DNI — Documento Nacional de Identidad" selected>DNI — Documento Nacional de Identidad
-                </option>
-                <option value="LC — Libreta Cívica">LC — Libreta Cívica</option>
-                <option value="LE — Libreta de Enrolamiento">LE — Libreta de Enrolamiento</option>
+              <label for="tipo_doc">Tipo de documento</label>
+              <select name="tipo_doc" id="tipo_doc" required>
+                <option value="" disabled selected>Seleccionar...</option>
+                <option value="DNI">DNI — Documento Nacional de Identidad</option>
+                <option value="LC">LC — Libreta Cívica</option>
+                <option value="LE">LE — Libreta de Enrolamiento</option>
               </select>
             </div>
           </div>
 
           <div class="grid-2">
             <div class="input-group">
-              <label for="num_doc">Número de documento *</label>
+              <label for="num_doc">Número de documento</label>
               <input type="text" name="num_doc" id="num_doc">
               <small>7 u 8 dígitos, sin puntos ni espacios.</small>
             </div>
 
             <div class="input-group">
-              <label for="cuit_fisica">CUIT / CUIL *</label>
+              <label for="cuit_fisica">CUIT / CUIL</label>
               <input type="text" name="cuit_fisica" id="cuit_fisica" class="input-cuit">
               <small>Once dígitos. Los guiones se agregan solos.</small>
             </div>
@@ -189,10 +195,11 @@
 
           <div class="input-group" style="max-width: 380px;">
             <label for="sexo_fisica">Sexo</label>
-            <select name="sexo_fisica" id="sexo_fisica">
+            <select name="sexo_fisica" id="sexo_fisica" required>
+              <option value="" disabled selected>Seleccionar...</option>
               <option value="Masculino">Masculino</option>
               <option value="Femenino">Femenino</option>
-              <option value="Otro">Otro / No declara</option>
+              <option value="Otro">Otro</option>
             </select>
           </div>
         </div>
@@ -203,13 +210,13 @@
 
           <div class="grid-2">
             <div class="input-group">
-              <label for="declarante_juridica">Apellido y nombre *</label>
+              <label for="declarante_juridica">Apellido y nombre</label>
               <input type="text" name="declarante_juridica" id="declarante_juridica">
               <small>De la persona física que declara por la sociedad</small>
             </div>
 
             <div class="input-group">
-              <label for="cuil_declarante">CUIL de la persona física *</label>
+              <label for="cuil_declarante">CUIL de la persona física</label>
               <input type="text" name="cuil_declarante" id="cuil_declarante" class="input-cuit">
               <small>Once dígitos. Los guiones se agregan solos.</small>
             </div>
@@ -218,9 +225,10 @@
           <div class="input-group" style="max-width: 380px; margin-bottom: 20px;">
             <label for="sexo_juridica">Sexo</label>
             <select name="sexo_juridica" id="sexo_juridica">
+              <option value="" disabled selected>Seleccionar...</option>
               <option value="Masculino">Masculino</option>
               <option value="Femenino">Femenino</option>
-              <option value="Otro">Otro / No declara</option>
+              <option value="Otro">Otro</option>
             </select>
           </div>
 
@@ -228,7 +236,7 @@
 
           <div class="grid-2" style="margin-bottom: 20px;">
             <div class="input-group">
-              <label for="caracter_sociedad">Carácter ante la sociedad *</label>
+              <label for="caracter_sociedad">Carácter ante la sociedad</label>
               <select name="caracter_sociedad" id="caracter_sociedad">
                 <option value="">Seleccionar...</option>
                 <option value="Representante legal">Representante legal</option>
@@ -240,7 +248,7 @@
             </div>
 
             <div class="input-group" id="grupoCaracterOtro" style="display: none;">
-              <label for="caracter_otro">¿Con cuál? *</label>
+              <label for="caracter_otro">¿Con cuál?</label>
               <input type="text" name="caracter_otro" id="caracter_otro">
               <small>Por ejemplo, albacea testamentario.</small>
             </div>
@@ -250,12 +258,12 @@
 
           <div class="grid-2">
             <div class="input-group">
-              <label for="razon_social">Razón social *</label>
+              <label for="razon_social">Razón social</label>
               <input type="text" name="razon_social" id="razon_social">
             </div>
 
             <div class="input-group">
-              <label for="cuit_empresa">CUIT de la persona jurídica *</label>
+              <label for="cuit_empresa">CUIT de la persona jurídica</label>
               <input type="text" name="cuit_empresa" id="cuit_empresa" class="input-cuit">
               <small>Once dígitos. Los guiones se agregan solos.</small>
             </div>
@@ -310,13 +318,13 @@
 
         <div class="grid-2">
           <div class="input-group">
-            <label for="telefono1">Teléfono Principal *</label>
+            <label for="telefono1">Teléfono</label>
             <input type="tel" name="telefono1" id="telefono1" required>
             <small>Solo números con característica.</small>
           </div>
 
           <div class="input-group">
-            <label for="email">Correo electrónico *</label>
+            <label for="email">Correo electrónico</label>
             <input type="email" name="email" id="email" required>
           </div>
         </div>
@@ -375,7 +383,7 @@
         <!-- Fila 1: Tipo de domicilio, País y Provincia -->
         <div class="grid-3">
           <div class="input-group">
-            <label for="domicilio_tipo">Tipo de Domicilio *</label>
+            <label for="domicilio_tipo">Tipo de Domicilio</label>
             <select name="domicilio_tipo" id="domicilio_tipo" required>
               <option value="Particular" selected>Particular</option>
               <option value="Legal">Legal</option>
@@ -384,12 +392,12 @@
           </div>
 
           <div class="input-group">
-            <label for="domicilio_pais">País *</label>
+            <label for="domicilio_pais">País</label>
             <select name="domicilio_pais" id="domicilio_pais" required></select>
           </div>
 
           <div class="input-group" id="contenedor_provincia">
-            <label for="domicilio_provincia">Provincia *</label>
+            <label for="domicilio_provincia">Provincia</label>
             <select name="domicilio_provincia" id="domicilio_provincia" required></select>
           </div>
         </div>
@@ -397,19 +405,19 @@
         <!-- Fila 2: Departamento y Municipio -->
         <div class="grid-2">
           <div class="input-group" id="contenedor_depto">
-            <label for="domicilio_depto">Departamento *</label>
+            <label for="domicilio_depto">Departamento</label>
             <select name="domicilio_depto" id="domicilio_depto" required></select>
           </div>
 
           <div class="input-group" id="contenedor_municipio">
-            <label for="domicilio_municipio">Municipio *</label>
+            <label for="domicilio_municipio">Municipio</label>
             <select name="domicilio_municipio" id="domicilio_municipio" required></select>
           </div>
         </div>
 
         <!-- Fila 3: Dirección -->
         <div class="input-group">
-          <label for="domicilio_calle">Calle / Ruta y Número *</label>
+          <label for="domicilio_calle">Calle / Ruta y Número</label>
           <input type="text" name="domicilio_calle" id="domicilio_calle" required>
         </div>
       </section>
@@ -476,14 +484,14 @@
         <!-- Fila 1: Departamento y Municipio en Cascada Dinámica -->
         <div class="grid-2">
           <div class="input-group">
-            <label for="departamento">Departamento del Predio *</label>
+            <label for="departamento">Departamento del Predio</label>
             <select name="departamento" id="departamento" required>
               <option value="">Seleccionar departamento...</option>
             </select>
           </div>
 
           <div class="input-group">
-            <label for="municipio">Municipio del Predio *</label>
+            <label for="municipio">Municipio del Predio</label>
             <select name="municipio" id="municipio" required>
               <option value="">Elegir departamento primero...</option>
             </select>
@@ -539,7 +547,7 @@
 
         <!-- Fila Final: RENSPA -->
         <div class="input-group" style="max-width: 380px; margin-top: 10px;">
-          <label for="renspa">RENSPA *</label>
+          <label for="renspa">RENSPA</label>
           <input type="text" name="renspa" id="renspa" class="input-renspa" placeholder="04.000.0.00000/00"
             maxlength="17" pattern="^04\.\d{3}\.\d{1}\.\d{5}\/\d{2}$" required>
           <small>Trece dígitos. Formato oficial 04.004.1.23123/21.</small>
@@ -597,13 +605,13 @@
         <!-- Fila 1: Superficie Destinada y Superficie Sembrada -->
         <div class="grid-2">
           <div class="input-group">
-            <label for="prod_sup_total">Superficie destinada al cultivo de arroz (Ha) *</label>
+            <label for="prod_sup_total">Superficie destinada al cultivo de arroz (Ha)</label>
             <input type="number" step="any" min="0" name="prod_sup_total" id="prod_sup_total" placeholder="0.0"
               required>
           </div>
 
           <div class="input-group">
-            <label for="prod_sup_sembrada">Superficie sembrada (Ha) *</label>
+            <label for="prod_sup_sembrada">Superficie sembrada (Ha)</label>
             <input type="number" step="any" min="0" name="prod_sup_sembrada" id="prod_sup_sembrada" placeholder="0.0"
               required>
           </div>
@@ -612,13 +620,13 @@
         <!-- Fila 2: Superficie Regada y Superficie Cosechada -->
         <div class="grid-2">
           <div class="input-group">
-            <label for="prod_sup_regada">Superficie regada (Ha) *</label>
+            <label for="prod_sup_regada">Superficie regada (Ha)</label>
             <input type="number" step="any" min="0" name="prod_sup_regada" id="prod_sup_regada" placeholder="0.0"
               required>
           </div>
 
           <div class="input-group">
-            <label for="prod_sup_cosechada">Superficie cosechada (Ha) *</label>
+            <label for="prod_sup_cosechada">Superficie cosechada (Ha)</label>
             <input type="number" step="any" min="0" name="prod_sup_cosechada" id="prod_sup_cosechada" placeholder="0.0"
               required>
           </div>
@@ -627,12 +635,12 @@
         <!-- Fila 3: Fecha inicio siembra y Campaña -->
         <div class="grid-2">
           <div class="input-group">
-            <label for="prod_fecha_siembra">Fecha inicio siembra *</label>
+            <label for="prod_fecha_siembra">Fecha inicio siembra</label>
             <input type="date" name="prod_fecha_siembra" id="prod_fecha_siembra" required>
           </div>
 
           <div class="input-group">
-            <label for="prod_campana">Campaña *</label>
+            <label for="prod_campana">Campaña</label>
             <input type="text" name="prod_campana" id="prod_campana" value="2026/2027" required>
           </div>
         </div>
@@ -811,9 +819,11 @@
       </div>
 
       <!-- Pie con Firma de Autor -->
+      <!--
       <footer class="footer-creditos">
         <span>By: PINAT, Juan Matias 😎</span>
       </footer>
+      -->
 
     </form>
   </div>

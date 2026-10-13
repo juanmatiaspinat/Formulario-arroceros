@@ -3,7 +3,7 @@
  * DECLARACIÓN JURADA ARROCEROS - MINISTERIO DE PRODUCCIÓN DE CORRIENTES
  * LÓGICA PRINCIPAL (APP.JS)
  * ==============================================================================
- * 
+ *
  * 1. ALTERNANCIA DINÁMICA: PERSONA FÍSICA / PERSONA JURÍDICA Y FORMATO CUIT
  * 2. MAPA LEAFLET OFICIAL (ESRI SATÉLITE + IGN + DIBUJO Y GEOLOCALIZACIÓN)
  * 3. GENERADOR DE PDF EN MEMORIA (JSPDF + AUTOTABLE)
@@ -15,7 +15,7 @@
  */
 
 // URL DEL APPS SCRIPT PUBLICADO (WEB APP)
-const SCRIPT_URL = "PEGAR_ACA_LA_URL_DE_TU_APPS_SCRIPT";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-8zlXDljjv6bjCO1RaaUblLvhO16EWuVBV_A4Jd7SqpNorZM4oFeuLrD_AGtqQlUI/exec";
 
 // ==============================================================================
 // 1. ALTERNANCIA DINÁMICA: PERSONA FÍSICA / PERSONA JURÍDICA
@@ -36,42 +36,119 @@ document.addEventListener("DOMContentLoaded", () => {
       bloqueFisica.style.display = "none";
       bloqueJuridica.style.display = "block";
 
-      // Desactivar campos requeridos de Persona Física
-      document.getElementById("productor_fisica").required = false;
-      document.getElementById("num_doc").required = false;
-      document.getElementById("cuit_fisica").required = false;
+      // 1. Desactivar campos requeridos de Persona Física (para que el navegador no bloquee el envío)
+      const inputProdFisica = document.getElementById("productor_fisica");
+      const selectTipoDoc = document.getElementById("tipo_doc");
+      const inputNumDoc = document.getElementById("num_doc");
+      const inputCuitFisica = document.getElementById("cuit_fisica");
+      const selectSexoFisica = document.getElementById("sexo_fisica");
 
-      // Activar campos requeridos de Persona Jurídica
-      document.getElementById("declarante_juridica").required = true;
-      document.getElementById("cuil_declarante").required = true;
-      document.getElementById("caracter_sociedad").required = true;
-      document.getElementById("razon_social").required = true;
-      document.getElementById("cuit_empresa").required = true;
+      if (inputProdFisica) inputProdFisica.required = false;
+      if (selectTipoDoc) selectTipoDoc.required = false;
+      if (inputNumDoc) inputNumDoc.required = false;
+      if (inputCuitFisica) inputCuitFisica.required = false;
+      if (selectSexoFisica) selectSexoFisica.required = false;
+
+      // 2. Activar campos requeridos de Persona Jurídica
+      const inputDeclarante = document.getElementById("declarante_juridica");
+      const inputCuilDeclarante = document.getElementById("cuil_declarante");
+      const selectSexoJuridica = document.getElementById("sexo_juridica");
+      const selectCaracter = document.getElementById("caracter_sociedad");
+      const inputRazonSocial = document.getElementById("razon_social");
+      const inputCuitEmpresa = document.getElementById("cuit_empresa");
+
+      if (inputDeclarante) inputDeclarante.required = true;
+      if (inputCuilDeclarante) inputCuilDeclarante.required = true;
+      if (selectSexoJuridica) selectSexoJuridica.required = true;
+      if (selectCaracter) selectCaracter.required = true;
+      if (inputRazonSocial) inputRazonSocial.required = true;
+      if (inputCuitEmpresa) inputCuitEmpresa.required = true;
+
     } else {
       bloqueFisica.style.display = "block";
       bloqueJuridica.style.display = "none";
 
-      // Activar campos requeridos de Persona Física
-      document.getElementById("productor_fisica").required = true;
-      document.getElementById("num_doc").required = true;
-      document.getElementById("cuit_fisica").required = true;
+      // 1. Activar campos requeridos de Persona Física
+      const inputProdFisica = document.getElementById("productor_fisica");
+      const selectTipoDoc = document.getElementById("tipo_doc");
+      const inputNumDoc = document.getElementById("num_doc");
+      const inputCuitFisica = document.getElementById("cuit_fisica");
+      const selectSexoFisica = document.getElementById("sexo_fisica");
 
-      // Desactivar campos requeridos de Persona Jurídica
-      document.getElementById("declarante_juridica").required = false;
-      document.getElementById("cuil_declarante").required = false;
-      document.getElementById("caracter_sociedad").required = false;
-      document.getElementById("razon_social").required = false;
-      document.getElementById("cuit_empresa").required = false;
+      if (inputProdFisica) inputProdFisica.required = true;
+      if (selectTipoDoc) selectTipoDoc.required = true;
+      if (inputNumDoc) inputNumDoc.required = true;
+      if (inputCuitFisica) inputCuitFisica.required = true;
+      if (selectSexoFisica) selectSexoFisica.required = true;
+
+      // 2. Desactivar campos requeridos de Persona Jurídica (evita el error 'is not focusable')
+      const inputDeclarante = document.getElementById("declarante_juridica");
+      const inputCuilDeclarante = document.getElementById("cuil_declarante");
+      const selectSexoJuridica = document.getElementById("sexo_juridica");
+      const selectCaracter = document.getElementById("caracter_sociedad");
+      const inputRazonSocial = document.getElementById("razon_social");
+      const inputCuitEmpresa = document.getElementById("cuit_empresa");
+
+      if (inputDeclarante) inputDeclarante.required = false;
+      if (inputCuilDeclarante) inputCuilDeclarante.required = false;
+      if (selectSexoJuridica) selectSexoJuridica.required = false;
+      if (selectCaracter) selectCaracter.required = false;
+      if (inputRazonSocial) inputRazonSocial.required = false;
+      if (inputCuitEmpresa) inputCuitEmpresa.required = false;
       if (inputCaracterOtro) inputCaracterOtro.required = false;
+
+      // Sincronización del texto de ayuda de documento según DNI, LC o LE
+      if (selectTipoDoc && inputNumDoc) {
+        const ayudaDoc = inputNumDoc.nextElementSibling;
+        const tipoActual = selectTipoDoc.value;
+        if (ayudaDoc && ayudaDoc.tagName === "SMALL") {
+          if (tipoActual === "LC" || tipoActual === "LE") {
+            ayudaDoc.textContent = "6 a 8 dígitos, sin puntos ni espacios.";
+          } else {
+            ayudaDoc.textContent = "7 u 8 dígitos, sin puntos ni espacios.";
+          }
+        }
+      }
     }
 
     // Revalidar la sección 1 para actualizar el badge de estado
     const sec1 = document.getElementById("sec-1");
-    if (sec1) validarSeccion(sec1, "badge-sec-1");
+    if (sec1 && typeof validarSeccion === "function") validarSeccion(sec1, "badge-sec-1");
+  }
+
+  // Listener para cuando el usuario cambia el tipo de documento (DNI / LC / LE)
+  const selectTipoDocElement = document.getElementById("tipo_doc");
+  if (selectTipoDocElement) {
+    selectTipoDocElement.addEventListener("change", () => {
+      const inputNumDoc = document.getElementById("num_doc");
+      const ayudaDoc = inputNumDoc ? inputNumDoc.nextElementSibling : null;
+      const selectSexoFisica = document.getElementById("sexo_fisica");
+      const tipo = selectTipoDocElement.value;
+
+      if (ayudaDoc && ayudaDoc.tagName === "SMALL") {
+        if (tipo === "LC" || tipo === "LE") {
+          ayudaDoc.textContent = "6 a 8 dígitos, sin puntos ni espacios.";
+        } else {
+          ayudaDoc.textContent = "7 u 8 dígitos, sin puntos ni espacios.";
+        }
+      }
+
+      // Sugerencia automática de sexo
+      if (selectSexoFisica && (!selectSexoFisica.value || selectSexoFisica.value === "")) {
+        if (tipo === "LC") selectSexoFisica.value = "Femenino";
+        if (tipo === "LE") selectSexoFisica.value = "Masculino";
+      }
+
+      const sec1 = document.getElementById("sec-1");
+      if (sec1 && typeof validarSeccion === "function") validarSeccion(sec1, "badge-sec-1");
+    });
   }
 
   if (selectTipoPersona) {
-    selectTipoPersona.addEventListener("change", actualizarVisibilidadTipoPersona);
+    selectTipoPersona.addEventListener(
+      "change",
+      actualizarVisibilidadTipoPersona,
+    );
   }
 
   // Mostrar u ocultar el campo condicional "¿Con cuál?"
@@ -121,7 +198,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Desplegable de Ayuda: Sección 2 (Contacto)
   const btnAyudaContacto = document.getElementById("btnToggleDocAyudaContacto");
-  const contAyudaContacto = document.getElementById("contenidoDocAyudaContacto");
+  const contAyudaContacto = document.getElementById(
+    "contenidoDocAyudaContacto",
+  );
   const flechaContacto = document.getElementById("flechaAyudaContacto");
 
   if (btnAyudaContacto && contAyudaContacto) {
@@ -132,8 +211,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Desplegable de Ayuda: Sección 3 (Domicilio)
-  const btnAyudaDomicilio = document.getElementById("btnToggleDocAyudaDomicilio");
-  const contAyudaDomicilio = document.getElementById("contenidoDocAyudaDomicilio");
+  const btnAyudaDomicilio = document.getElementById(
+    "btnToggleDocAyudaDomicilio",
+  );
+  const contAyudaDomicilio = document.getElementById(
+    "contenidoDocAyudaDomicilio",
+  );
   const flechaDomicilio = document.getElementById("flechaAyudaDomicilio");
 
   if (btnAyudaDomicilio && contAyudaDomicilio) {
@@ -156,8 +239,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Desplegable de Ayuda: Sección 5 (Producción)
-  const btnAyudaProduccion = document.getElementById("btnToggleDocAyudaProduccion");
-  const contAyudaProduccion = document.getElementById("contenidoDocAyudaProduccion");
+  const btnAyudaProduccion = document.getElementById(
+    "btnToggleDocAyudaProduccion",
+  );
+  const contAyudaProduccion = document.getElementById(
+    "contenidoDocAyudaProduccion",
+  );
   const flechaProduccion = document.getElementById("flechaAyudaProduccion");
 
   if (btnAyudaProduccion && contAyudaProduccion) {
@@ -217,14 +304,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   map = L.map("mapaLote").setView([-28.5, -57.8], 7);
 
-  capaSatelite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-    attribution: "Esri, Maxar, Earthstar Geographics",
-    maxZoom: 18
-  }).addTo(map);
+  capaSatelite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      attribution: "Esri, Maxar, Earthstar Geographics",
+      maxZoom: 18,
+    },
+  ).addTo(map);
 
   capaIGN = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "Instituto Geográfico Nacional / OSM",
-    maxZoom: 18
+    maxZoom: 18,
   });
 
   // Conmutador de capas satelital e IGN
@@ -259,55 +349,68 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Geolocalización del dispositivo
-  document.getElementById("btnDetectarUbicacion").addEventListener("click", () => {
-    if (!navigator.geolocation) {
-      alert("Tu dispositivo no soporta geolocalización.");
-      return;
-    }
+  document
+    .getElementById("btnDetectarUbicacion")
+    .addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert("Tu dispositivo no soporta geolocalización.");
+        return;
+      }
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
 
-        map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
+          map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
 
-        if (marcadorUbicacionGPS) map.removeLayer(marcadorUbicacionGPS);
-        marcadorUbicacionGPS = L.circleMarker([lat, lng], {
-          radius: 7,
-          color: "#ffffff",
-          weight: 2,
-          fillColor: "#2563eb",
-          fillOpacity: 1
-        }).addTo(map).bindPopup("Tu ubicación actual").openPopup();
-      },
-      (err) => {
-        alert("No se pudo detectar la ubicación: " + err.message);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  });
+          if (marcadorUbicacionGPS) map.removeLayer(marcadorUbicacionGPS);
+          marcadorUbicacionGPS = L.circleMarker([lat, lng], {
+            radius: 7,
+            color: "#ffffff",
+            weight: 2,
+            fillColor: "#2563eb",
+            fillOpacity: 1,
+          })
+            .addTo(map)
+            .bindPopup("Tu ubicación actual")
+            .openPopup();
+        },
+        (err) => {
+          alert("No se pudo detectar la ubicación: " + err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000 },
+      );
+    });
 
   // Panel plegable de coordenadas
-  document.getElementById("btnAbrirCargarCoords").addEventListener("click", () => {
-    const caja = document.getElementById("cajaCargarCoords");
-    caja.style.display = caja.style.display === "none" ? "block" : "none";
-  });
+  document
+    .getElementById("btnAbrirCargarCoords")
+    .addEventListener("click", () => {
+      const caja = document.getElementById("cajaCargarCoords");
+      caja.style.display = caja.style.display === "none" ? "block" : "none";
+    });
 
   document.getElementById("btnCancelarCoords").addEventListener("click", () => {
     document.getElementById("cajaCargarCoords").style.display = "none";
   });
 
   document.getElementById("btnAplicarCoords").addEventListener("click", () => {
-    const textoCoords = document.getElementById("inputCoordenadaCampo").value.trim();
-    const supHa = parseFloat(document.getElementById("inputSuperficieLote").value) || 3.5;
+    const textoCoords = document
+      .getElementById("inputCoordenadaCampo")
+      .value.trim();
+    const supHa =
+      parseFloat(document.getElementById("inputSuperficieLote").value) || 3.5;
 
     if (!textoCoords) {
       alert("Ingresá al menos una coordenada (latitud, longitud).");
       return;
     }
 
-    const lineas = textoCoords.split("\n").map(l => l.trim()).filter(Boolean);
+    const lineas = textoCoords
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
     if (lineas.length === 1) {
       const partes = lineas[0].replace(/[^\d.,-]/g, "").split(",");
       if (partes.length >= 2) {
@@ -323,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else {
       puntosLote = [];
-      lineas.forEach(lin => {
+      lineas.forEach((lin) => {
         const p = lin.replace(/[^\d.,-]/g, "").split(",");
         if (p.length >= 2) {
           const lat = parseFloat(p[0]);
@@ -343,17 +446,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("btnBorrarDibujo").addEventListener("click", limpiarTodoElMapa);
+  document
+    .getElementById("btnBorrarDibujo")
+    .addEventListener("click", limpiarTodoElMapa);
 
-  document.getElementById("btnAjustarEsquinas").addEventListener("click", () => {
-    activarVerticesArrastrables();
-  });
+  document
+    .getElementById("btnAjustarEsquinas")
+    .addEventListener("click", () => {
+      activarVerticesArrastrables();
+    });
 });
 
 function iniciarModoDibujo() {
   limpiarTodoElMapa();
   modoDibujoActivo = true;
-  document.getElementById("mapaInstruccion").innerText = "Hacé clic en el mapa para marcar las esquinas. Tocá el primer punto (círculo verde) para cerrar el lote.";
+  document.getElementById("mapaInstruccion").innerText =
+    "Hacé clic en el mapa para marcar las esquinas. Tocá el primer punto (círculo verde) para cerrar el lote.";
 
   // Activa el cursor de precisión en el mapa
   const contMapa = document.getElementById("mapaLote");
@@ -378,11 +486,14 @@ function agregarVertice(lat, lng) {
     color: esPrimerPunto ? "#15803d" : "#f59e0b",
     fillColor: esPrimerPunto ? "#22c55e" : "#fbbf24",
     fillOpacity: 1,
-    weight: esPrimerPunto ? 3 : 2
+    weight: esPrimerPunto ? 3 : 2,
   }).addTo(map);
 
   if (esPrimerPunto) {
-    marker.bindTooltip("Clic acá para cerrar", { permanent: false, direction: "top" });
+    marker.bindTooltip("Clic acá para cerrar", {
+      permanent: false,
+      direction: "top",
+    });
     marker.on("click", (ev) => {
       L.DomEvent.stopPropagation(ev);
       if (puntosLote.length >= 3) {
@@ -397,7 +508,7 @@ function agregarVertice(lat, lng) {
   polylineTemporal = L.polyline(puntosLote, {
     color: "#f59e0b",
     weight: 2,
-    dashArray: "4, 4"
+    dashArray: "4, 4",
   }).addTo(map);
 }
 
@@ -413,27 +524,30 @@ function cerrarPoligono(hectareasForzadas) {
     polylineTemporal = null;
   }
   if (polygonLayer) map.removeLayer(polygonLayer);
-  marcadoresVertices.forEach(m => map.removeLayer(m));
+  marcadoresVertices.forEach((m) => map.removeLayer(m));
   marcadoresVertices = [];
 
   polygonLayer = L.polygon(puntosLote, {
     color: "#fbbf24",
     weight: 3,
     fillColor: "#fef08a",
-    fillOpacity: 0.3
+    fillOpacity: 0.3,
   }).addTo(map);
 
   map.fitBounds(polygonLayer.getBounds(), { padding: [30, 30] });
 
   const ha = hectareasForzadas || calcularHectareas(puntosLote);
-  document.getElementById("txtHectareasCalc").innerText = `· ${ha.toFixed(1).replace(".", ",")} ha de referencia`;
+  document.getElementById("txtHectareasCalc").innerText =
+    `· ${ha.toFixed(1).replace(".", ",")} ha de referencia`;
 
   document.getElementById("barraHerramientasInicial").style.display = "none";
   document.getElementById("barraHerramientasDibujado").style.display = "flex";
   document.getElementById("txtNotaLote").style.display = "block";
-  document.getElementById("mapaInstruccion").innerText = "Las esquinas se ajustan arrastrándolas. También podés borrar el dibujo y volver a empezar.";
+  document.getElementById("mapaInstruccion").innerText =
+    "Las esquinas se ajustan arrastrándolas. También podés borrar el dibujo y volver a empezar.";
 
-  document.getElementById("coordenadas_lote").value = JSON.stringify(puntosLote);
+  document.getElementById("coordenadas_lote").value =
+    JSON.stringify(puntosLote);
 
   activarVerticesArrastrables();
 }
@@ -448,14 +562,14 @@ function crearCuadradoAlrededorDePunto(lat, lng, supHa) {
     [lat + dLat, lng - dLng],
     [lat + dLat, lng + dLng],
     [lat - dLat, lng + dLng],
-    [lat - dLat, lng - dLng]
+    [lat - dLat, lng - dLng],
   ];
 
   cerrarPoligono(supHa);
 }
 
 function activarVerticesArrastrables() {
-  marcadoresVertices.forEach(m => map.removeLayer(m));
+  marcadoresVertices.forEach((m) => map.removeLayer(m));
   marcadoresVertices = [];
 
   puntosLote.forEach((pt, idx) => {
@@ -465,8 +579,10 @@ function activarVerticesArrastrables() {
       puntosLote[idx] = [e.latlng.lat, e.latlng.lng];
       polygonLayer.setLatLngs(puntosLote);
       const ha = calcularHectareas(puntosLote);
-      document.getElementById("txtHectareasCalc").innerText = `· ${ha.toFixed(1).replace(".", ",")} ha de referencia`;
-      document.getElementById("coordenadas_lote").value = JSON.stringify(puntosLote);
+      document.getElementById("txtHectareasCalc").innerText =
+        `· ${ha.toFixed(1).replace(".", ",")} ha de referencia`;
+      document.getElementById("coordenadas_lote").value =
+        JSON.stringify(puntosLote);
     });
 
     marcadoresVertices.push(marker);
@@ -482,7 +598,8 @@ function calcularHectareas(coords) {
     area -= coords[j][1] * coords[i][0];
   }
   area = Math.abs(area) / 2;
-  const metrosCuadrados = area * 111320 * (111320 * Math.cos(-28.5 * Math.PI / 180));
+  const metrosCuadrados =
+    area * 111320 * (111320 * Math.cos((-28.5 * Math.PI) / 180));
   return metrosCuadrados / 10000;
 }
 
@@ -495,7 +612,7 @@ function limpiarTodoElMapa() {
   polygonLayer = null;
   if (polylineTemporal) map.removeLayer(polylineTemporal);
   polylineTemporal = null;
-  marcadoresVertices.forEach(m => map.removeLayer(m));
+  marcadoresVertices.forEach((m) => map.removeLayer(m));
   marcadoresVertices = [];
   puntosLote = [];
   modoDibujoActivo = false;
@@ -505,7 +622,8 @@ function limpiarTodoElMapa() {
   document.getElementById("txtNotaLote").style.display = "none";
   document.getElementById("cajaCargarCoords").style.display = "none";
   document.getElementById("coordenadas_lote").value = "";
-  document.getElementById("mapaInstruccion").innerText = "Marcar el lote en el mapa es opcional: la declaración se presenta igual. Marcarlo ayuda a que la evaluación ubique el terreno afectado.";
+  document.getElementById("mapaInstruccion").innerText =
+    "Marcar el lote en el mapa es opcional: la declaración se presenta igual. Marcarlo ayuda a que la evaluación ubique el terreno afectado.";
 }
 
 // ==============================================================================
@@ -537,14 +655,20 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
 
   // Mapeo condicional Persona Física / Jurídica
   const esJuridica = data.tipo_persona === "Jurídica";
-  const nombreProductor = esJuridica ? data.razon_social : data.productor_fisica;
+  const nombreProductor = esJuridica
+    ? data.razon_social
+    : data.productor_fisica;
   const cuitProductor = esJuridica ? data.cuit_empresa : data.cuit_fisica;
   const docIdentidad = esJuridica
     ? `Declarante: ${data.declarante_juridica || "-"} (CUIL: ${data.cuil_declarante || "-"})`
     : `${data.tipo_doc || "DNI"}: ${data.num_doc || "-"}`;
-  const sexoProductor = esJuridica ? (data.sexo_juridica || "-") : (data.sexo_fisica || "-");
+  const sexoProductor = esJuridica
+    ? data.sexo_juridica || "-"
+    : data.sexo_fisica || "-";
   const caracterFirma = esJuridica
-    ? (data.caracter_sociedad === "Otro" ? `Otro: ${data.caracter_otro || "-"}` : data.caracter_sociedad || "-")
+    ? data.caracter_sociedad === "Otro"
+      ? `Otro: ${data.caracter_otro || "-"}`
+      : data.caracter_sociedad || "-"
     : "Titular";
 
   // TABLA 1: DATOS DEL PRODUCTOR Y CONTACTO
@@ -556,7 +680,7 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
     ["CUIT / CUIL", cuitProductor || "-"],
     ["Sexo", sexoProductor],
     ["Teléfono Principal", data.telefono1 || "-"],
-    ["Correo Electrónico", data.email || "-"]
+    ["Correo Electrónico", data.email || "-"],
   ];
 
   doc.autoTable({
@@ -566,9 +690,13 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
     head: [["1. DATOS DEL PRODUCTOR Y CONTACTO", "DETALLE"]],
     body: bodyTabla1,
     theme: "striped",
-    headStyles: { fillColor: [29, 86, 143], fontSize: 7.5, textColor: [255, 255, 255] },
+    headStyles: {
+      fillColor: [29, 86, 143],
+      fontSize: 7.5,
+      textColor: [255, 255, 255],
+    },
     styles: { fontSize: 7.5, cellPadding: 1.8, textColor: [46, 45, 44] },
-    columnStyles: { 0: { fontStyle: "bold", cellWidth: 65 } }
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 65 } },
   });
 
   // TABLA 2: DOMICILIO
@@ -583,12 +711,19 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
       ["Tipo de Domicilio", data.domicilio_tipo || "Particular"],
       ["Calle / Ruta y Número", data.domicilio_calle || "-"],
       ["Municipio y Departamento", locDetalle],
-      ["Provincia y País", `${data.domicilio_provincia || "Corrientes"}, ${data.domicilio_pais || "Argentina"}`]
+      [
+        "Provincia y País",
+        `${data.domicilio_provincia || "Corrientes"}, ${data.domicilio_pais || "Argentina"}`,
+      ],
     ],
     theme: "striped",
-    headStyles: { fillColor: [29, 86, 143], fontSize: 7.5, textColor: [255, 255, 255] },
+    headStyles: {
+      fillColor: [29, 86, 143],
+      fontSize: 7.5,
+      textColor: [255, 255, 255],
+    },
     styles: { fontSize: 7.5, cellPadding: 1.8, textColor: [46, 45, 44] },
-    columnStyles: { 0: { fontStyle: "bold", cellWidth: 65 } }
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 65 } },
   });
 
   // TABLA 3: PREDIO Y PRODUCCIÓN ARROCERA
@@ -598,19 +733,37 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
     tableWidth: 182,
     head: [["3. PREDIO Y PRODUCCIÓN ARROCERA", "VALOR"]],
     body: [
-      ["Departamento / Municipio del Predio", `${data.departamento || "-"} / ${data.municipio || "-"}`],
+      [
+        "Departamento / Municipio del Predio",
+        `${data.departamento || "-"} / ${data.municipio || "-"}`,
+      ],
       ["N° Partida Inmobiliaria (Adrema)", data.partida || "-"],
       ["Tenencia de la Partida", data.tenencia || "-"],
       ["RENSPA", data.renspa || "-"],
       ["Superficie Total Destinada (Ha)", `${data.sup_arroz || "0.0"} ha`],
-      ["Superficie Sembrada / Regada (Ha)", `${data.sup_sembrada || "0.0"} ha / ${data.sup_regada || "0.0"} ha`],
-      ["Fecha Inicio Siembra / Campaña", `${data.fecha_siembra || "-"} (Campaña ${data.campana || "2026/2027"})`],
-      ["Coordenadas del Lote (GPS)", data.coordenadas_lote ? "Geometría trazada en el mapa" : "No informadas en mapa"]
+      [
+        "Superficie Sembrada / Regada (Ha)",
+        `${data.sup_sembrada || "0.0"} ha / ${data.sup_regada || "0.0"} ha`,
+      ],
+      [
+        "Fecha Inicio Siembra / Campaña",
+        `${data.fecha_siembra || "-"} (Campaña ${data.campana || "2026/2027"})`,
+      ],
+      [
+        "Coordenadas del Lote (GPS)",
+        data.coordenadas_lote
+          ? "Geometría trazada en el mapa"
+          : "No informadas en mapa",
+      ],
     ],
     theme: "striped",
-    headStyles: { fillColor: [29, 86, 143], fontSize: 7.5, textColor: [255, 255, 255] },
+    headStyles: {
+      fillColor: [29, 86, 143],
+      fontSize: 7.5,
+      textColor: [255, 255, 255],
+    },
     styles: { fontSize: 7.5, cellPadding: 1.8, textColor: [46, 45, 44] },
-    columnStyles: { 0: { fontStyle: "bold", cellWidth: 65 } }
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 65 } },
   });
 
   // Texto Legal al pie
@@ -618,7 +771,8 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setTextColor(120, 53, 15);
-  const textoLegal = "DECLARO BAJO JURAMENTO QUE LOS DATOS CONSIGNADOS PRECEDENTEMENTE SON VERACES Y REFLEJAN LA REALIDAD DEL ESTABLECIMIENTO. ASUMO CONOCER LAS SANCIONES ESPECIFICADAS POR LA LEY QUE ME CORRESPONDE EN CASO DE VERIFICARSE FALSEDAD EN LOS DATOS (ART. 292 Y 293 CÓDIGO PENAL DE LA NACIÓN).";
+  const textoLegal =
+    "DECLARO BAJO JURAMENTO QUE LOS DATOS CONSIGNADOS PRECEDENTEMENTE SON VERACES Y REFLEJAN LA REALIDAD DEL ESTABLECIMIENTO. ASUMO CONOCER LAS SANCIONES ESPECIFICADAS POR LA LEY QUE ME CORRESPONDE EN CASO DE VERIFICARSE FALSEDAD EN LOS DATOS (ART. 292 Y 293 CÓDIGO PENAL DE LA NACIÓN).";
   doc.text(textoLegal, 14, yLegal, { maxWidth: 182 });
 
   const dataUri = doc.output("datauristring");
@@ -626,23 +780,122 @@ function generarPdfEnMemoria(data, numComprobante, fechaHoraStr) {
 }
 
 // ==============================================================================
-// 4. ENVÍO DEL FORMULARIO
+// GENERADOR DE COMPROBANTE ULTRA RESUMEN (DESCARGA DEL PRODUCTOR)
+// ==============================================================================
+function generarComprobanteResumen(data, numComprobante, fechaHoraStr) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a5" // Tamaño A5: compacto, ideal para constancia
+  });
+
+  const azulOscuro = [11, 44, 91];
+  const grisTexto = [70, 70, 70];
+
+  // 1. Encabezado institucional
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...azulOscuro);
+  doc.text("GOBIERNO DE LA PROVINCIA DE CORRIENTES", 74, 18, { align: "center" });
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text("Ministerio de Producción — Dirección de Economía Agraria", 74, 23, { align: "center" });
+  doc.text("CERTIFICACIÓN DE DECLARACIÓN JURADA ARROCERA", 74, 28, { align: "center" });
+
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, 32, 133, 32);
+
+  // 2. Caja destacada del N° de Comprobante
+  doc.setFillColor(245, 248, 255);
+  doc.setDrawColor(11, 44, 91);
+  doc.setLineWidth(0.6);
+  doc.roundedRect(18, 36, 112, 22, 3, 3, "FD");
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...azulOscuro);
+  doc.text("NÚMERO DE COMPROBANTE OFICIAL", 74, 43, { align: "center" });
+
+  doc.setFontSize(16);
+  doc.text(numComprobante, 74, 52, { align: "center" });
+
+  // 3. Datos clave del declarante (Ultra Resumen)
+  const esJuridica = data.tipo_persona === "Jurídica";
+  const titular = esJuridica ? (data.razon_social || "-") : (data.productor_fisica || "-");
+  const docIdentidad = esJuridica
+    ? `CUIT: ${data.cuit_empresa || "-"}`
+    : `${data.tipo_doc || "DNI"}: ${data.num_doc || data.cuit_fisica || "-"}`;
+  const ubicacion = `${data.municipio || "-"}, ${data.departamento || "-"}`;
+  const supTotal = `${data.prod_sup_total || "0"} ha`;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...azulOscuro);
+  doc.text("DATOS DE LA PRESENTACIÓN", 18, 67);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...grisTexto);
+
+  let y = 74;
+  const espaciado = 6.5;
+
+  const filas = [
+    ["Titular / Razón Social:", titular],
+    ["Identificación:", docIdentidad],
+    ["Tipo de Persona:", esJuridica ? "Persona Jurídica" : "Persona Física"],
+    ["Ubicación del Predio:", ubicacion],
+    ["Superficie Declarada:", supTotal],
+    ["Fecha y Hora de Envío:", fechaHoraStr]
+  ];
+
+  filas.forEach(([etiqueta, valor]) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(etiqueta, 18, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(valor), 62, y);
+    y += espaciado;
+  });
+
+  // 4. Pie de validez y seguridad
+  doc.setDrawColor(220, 220, 220);
+  doc.line(15, 120, 133, 120);
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(120, 120, 120);
+  doc.text(
+    "Esta constancia certifica la recepción de la Declaración Jurada en el sistema oficial del Ministerio.",
+    74, 125, { align: "center" }
+  );
+  doc.text(
+    "Conserve este comprobante ante cualquier requerimiento administrativo.",
+    74, 129, { align: "center" }
+  );
+
+  return doc;
+}
+
+// ==============================================================================
+// 4. ENVÍO DEL FORMULARIO Y CONSUMO DE API APPS SCRIPT
 // ==============================================================================
 document.getElementById("arrozForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Verificación global de todas las secciones antes de enviar
+  // 1. Verificación global de todas las secciones antes de enviar
   const secciones = [
     { sec: document.getElementById("sec-1"), badge: "badge-sec-1" },
     { sec: document.getElementById("sec-2"), badge: "badge-sec-2" },
     { sec: document.getElementById("sec-3"), badge: "badge-sec-3" },
     { sec: document.getElementById("sec-4"), badge: "badge-sec-4" },
-    { sec: document.getElementById("sec-5"), badge: "badge-sec-5" }
+    { sec: document.getElementById("sec-5"), badge: "badge-sec-5" },
   ];
 
   let hayErrores = false;
   secciones.forEach(({ sec, badge }) => {
-    if (sec && !validarSeccion(sec, badge)) {
+    if (sec && typeof validarSeccion === "function" && !validarSeccion(sec, badge)) {
       hayErrores = true;
     }
   });
@@ -658,39 +911,207 @@ document.getElementById("arrozForm").addEventListener("submit", async (e) => {
 
   const form = e.target;
   const formData = new FormData(form);
-  const data = Object.fromEntries(formData.entries());
+  const data = {};
 
-  const numComprobante = "ARROZ-" + new Date().getTime().toString().slice(-6);
+  // 2. Captura segura de campos múltiples (Partidas dinámicas)
+  data["partida_numero[]"] = formData.getAll("partida_numero[]");
+  data["partida_superficie[]"] = formData.getAll("partida_superficie[]");
+  data["partida_tenencia[]"] = formData.getAll("partida_tenencia[]");
+
+  // Captura del resto de campos simples
+  for (let [key, val] of formData.entries()) {
+    if (!key.endsWith("[]")) {
+      data[key] = val;
+    }
+  }
+
+  // 3. Generación de Comprobante oficial: 6 números + 1 letra (ej: 550940W)
+  const numRandom = Math.floor(100000 + Math.random() * 900000);
+  const letrasValidas = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const letraRandom = letrasValidas.charAt(Math.floor(Math.random() * letrasValidas.length));
+  const numComprobante = `${numRandom}${letraRandom}`;
+
   const ahora = new Date();
-  const fechaHoraStr = ahora.toLocaleDateString("es-AR") + " " + ahora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+  const fechaHoraStr =
+    ahora.toLocaleDateString("es-AR") +
+    " " +
+    ahora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
 
-  const pdfBase64 = generarPdfEnMemoria(data, numComprobante, fechaHoraStr);
+  data.comprobante = numComprobante;
+  data.fecha_presentacion = fechaHoraStr;
+
+  // Helpers para normalizar el nombre del PDF completo de Drive
+  const limpiarTexto = (str) => {
+    return (str || "")
+      .toString()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  };
+
+  const formatearNombre = (str) => {
+    return limpiarTexto(str)
+      .replace(/[^a-zA-Z0-9\s]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+  };
+
+  const sanitizar = (str) => {
+    return limpiarTexto(str)
+      .replace(/[^a-zA-Z0-9]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
+  };
+
+  const dia = String(ahora.getDate()).padStart(2, "0");
+  const mes = String(ahora.getMonth() + 1).padStart(2, "0");
+  const anio = ahora.getFullYear();
+  const fechaHoyStr = `${dia}-${mes}-${anio}`;
+
+  const esJuridica = data.tipo_persona === "Jurídica";
+  const sujeto = esJuridica ? (data.razon_social || "Empresa") : (data.productor_fisica || "Productor");
+  const documento = esJuridica ? (data.cuit_empresa || "") : (data.num_doc || data.cuit_fisica || "");
+  const muni = data.municipio || "Municipio";
+  const depto = data.departamento || "Depto";
+
+  // PDF completo para Drive: DDJJ_Nombre-Apellido_DNI_Municipio_Depto_DD-MM-AAAA.pdf
+  const nombreArchivoPdf = `DDJJ_${formatearNombre(sujeto)}_${sanitizar(documento)}_${sanitizar(muni)}_${sanitizar(depto)}_${fechaHoyStr}.pdf`;
+  data.nombre_archivo = nombreArchivoPdf;
+
+  // 4. Generación del PDF Completo en memoria para Drive
+  let pdfBase64 = null;
+  if (typeof generarPdfEnMemoria === "function") {
+    try {
+      pdfBase64 = await generarPdfEnMemoria(data, numComprobante, fechaHoraStr);
+    } catch (err) {
+      console.warn("No se pudo generar el Base64 del PDF completo:", err);
+    }
+  }
 
   const payload = {
     ...data,
-    comprobante: numComprobante,
+    nombre_archivo: nombreArchivoPdf,
     pdfBase64: pdfBase64
   };
 
+  // 5. Envío al backend de Google Apps Script
   try {
-    await fetch(SCRIPT_URL, {
+    const res = await fetch(SCRIPT_URL, {
       method: "POST",
       body: JSON.stringify(payload)
     });
 
+    const resultado = await res.json();
+
+    if (resultado.status === "error") {
+      throw new Error(resultado.message || "Error informado por el servidor");
+    }
+
+    // --- PANTALLA DE ÉXITO Y TRANSICIÓN VISUAL ---
     form.style.display = "none";
+
+    // 1. Ocultar la caja verde de recomendaciones usando su ID exacto del HTML
+    const cajaAyudaGeneral = document.getElementById("boxDocAyudaGeneral");
+    if (cajaAyudaGeneral) {
+      cajaAyudaGeneral.style.display = "none";
+    }
+
     const msg = document.getElementById("mensajeExito");
     const txtComp = document.getElementById("txtComprobante");
-    txtComp.innerText = `N° de Comprobante: ${numComprobante}`;
-    msg.style.display = "block";
+
+    // 2. Configurar texto de comprobante, Botón Azul y Alerta Roja
+    if (txtComp) {
+      txtComp.innerText = `N° de Comprobante: ${numComprobante}`;
+      txtComp.style.fontSize = "22px";
+      txtComp.style.fontWeight = "700";
+      txtComp.style.color = "#111827";
+
+      let contenedorAccion = document.getElementById("contenedorAccionComprobante");
+      if (!contenedorAccion) {
+        contenedorAccion = document.createElement("div");
+        contenedorAccion.id = "contenedorAccionComprobante";
+        contenedorAccion.style.margin = "20px 0 14px 0";
+        contenedorAccion.style.textAlign = "center";
+
+        const btnDescargar = document.createElement("button");
+        btnDescargar.type = "button";
+        btnDescargar.id = "btnDescargarComprobante";
+        btnDescargar.style.cssText = `
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          background-color: #0b2c5b;
+          color: #ffffff;
+          padding: 12px 28px;
+          font-size: 15px;
+          font-weight: 600;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          box-shadow: 0 4px 6px -1px rgba(11, 44, 91, 0.2);
+          transition: background-color 0.2s ease;
+        `;
+
+        btnDescargar.onmouseenter = () => btnDescargar.style.backgroundColor = "#081f42";
+        btnDescargar.onmouseleave = () => btnDescargar.style.backgroundColor = "#0b2c5b";
+
+        btnDescargar.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Descargar Comprobante
+        `;
+
+        btnDescargar.onclick = () => {
+          try {
+            if (typeof generarComprobanteResumen === "function") {
+              const docResumen = generarComprobanteResumen(data, numComprobante, fechaHoraStr);
+              docResumen.save(`Comprobante_${numComprobante}.pdf`);
+            } else if (pdfBase64) {
+              const link = document.createElement("a");
+              link.href = "data:application/pdf;base64," + pdfBase64;
+              link.download = `Comprobante_${numComprobante}.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          } catch (e) {
+            console.error("Error al generar descarga:", e);
+            alert("No se pudo procesar la descarga en este momento.");
+          }
+        };
+
+        const alertaRoja = document.createElement("p");
+        alertaRoja.id = "alertaGuardarComprobante";
+        alertaRoja.style.cssText = `
+          color: #dc2626;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          margin-top: 14px;
+          margin-bottom: 0;
+          text-transform: uppercase;
+        `;
+        alertaRoja.innerText = "¡MUY IMPORTANTE: GUARDAR N° DE COMPROBANTE!";
+
+        contenedorAccion.appendChild(btnDescargar);
+        contenedorAccion.appendChild(alertaRoja);
+        txtComp.insertAdjacentElement("afterend", contenedorAccion);
+      }
+    }
+
+    if (msg) msg.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
   } catch (error) {
-    console.error("Error al enviar:", error);
-    form.style.display = "none";
-    const msg = document.getElementById("mensajeExito");
-    const txtComp = document.getElementById("txtComprobante");
-    txtComp.innerText = `N° de Comprobante: ${numComprobante}`;
-    msg.style.display = "block";
+    console.error("Error al enviar la declaración:", error);
+    alert("Ocurrió un error al registrar la presentación. Por favor verificá tu conexión e intentalo nuevamente.");
+    btn.disabled = false;
+    btn.innerText = "Presentar Declaración Jurada";
   }
 });
 
@@ -701,8 +1122,11 @@ function validarSeccion(sectionElement, badgeId) {
   const badge = document.getElementById(badgeId);
   if (!sectionElement || !badge) return false;
 
-  const inputs = Array.from(sectionElement.querySelectorAll("input, select, textarea"))
-    .filter(el => el.type !== "hidden" && el.offsetParent !== null && !el.disabled);
+  const inputs = Array.from(
+    sectionElement.querySelectorAll("input, select, textarea"),
+  ).filter(
+    (el) => el.type !== "hidden" && el.offsetParent !== null && !el.disabled,
+  );
 
   let tieneError = false;
   let tieneCamposVacios = false;
@@ -736,11 +1160,24 @@ function validarSeccion(sectionElement, badgeId) {
       }
     }
 
-    // Validación de DNI
+    // Validación según tipo de documento (DNI, LC, LE)
     if (input.id === "num_doc" && val) {
-      if (!/^\d{7,8}$/.test(val)) {
-        tieneError = true;
-        break;
+      const selectTipoDoc = document.getElementById("tipo_doc");
+      const tipo = selectTipoDoc ? selectTipoDoc.value : "DNI";
+      const numValor = parseInt(val, 10);
+
+      if (tipo === "LC" || tipo === "LE") {
+        // LC y LE tienen entre 6 y 7 dígitos (máximo hasta 9.999.999)
+        if (!/^\d{6,7}$/.test(val) || numValor >= 10000000) {
+          tieneError = true;
+          break;
+        }
+      } else {
+        // DNI tiene 7 u 8 dígitos
+        if (!/^\d{7,8}$/.test(val)) {
+          tieneError = true;
+          break;
+        }
       }
     }
 
@@ -777,7 +1214,10 @@ function validarSeccion(sectionElement, badgeId) {
     }
   }
 
-  if (camposRequeridosContados > 0 && camposCompletosContados < camposRequeridosContados) {
+  if (
+    camposRequeridosContados > 0 &&
+    camposCompletosContados < camposRequeridosContados
+  ) {
     tieneCamposVacios = true;
   }
 
@@ -806,7 +1246,7 @@ function inicializarControlBadges() {
     { sec: document.getElementById("sec-2"), badge: "badge-sec-2" },
     { sec: document.getElementById("sec-3"), badge: "badge-sec-3" },
     { sec: document.getElementById("sec-4"), badge: "badge-sec-4" },
-    { sec: document.getElementById("sec-5"), badge: "badge-sec-5" }
+    { sec: document.getElementById("sec-5"), badge: "badge-sec-5" },
   ];
 
   secciones.forEach(({ sec, badge }) => {
@@ -823,61 +1263,294 @@ function inicializarControlBadges() {
 // 6. BASE DE DATOS GEOGRÁFICA Y CASCADA DINÁMICA DE DOMICILIO
 // ==============================================================================
 const PAISES_MUNDO = [
-  "Afganistán", "Albania", "Alemania", "Andorra", "Angola", "Antigua y Barbuda", "Arabia Saudita", "Argelia", "Argentina",
-  "Armenia", "Australia", "Austria", "Azerbaiyán", "Bahamas", "Bangladés", "Barbados", "Baréin", "Bélgica", "Belice",
-  "Benín", "Bielorrusia", "Birmania", "Bolivia", "Bosnia y Herzegovina", "Botsuana", "Brasil", "Brunéi", "Bulgaria",
-  "Burkina Faso", "Burundi", "Bután", "Cabo Verde", "Camboya", "Camerún", "Canadá", "Catar", "Chad", "Chile", "China",
-  "Chipre", "Colombia", "Comoras", "Corea del Norte", "Corea del Sur", "Costa de Marfil", "Costa Rica", "Croacia",
-  "Cuba", "Dinamarca", "Dominica", "Ecuador", "Egipto", "El Salvador", "Emiratos Árabes Unidos", "Eritrea", "Eslovaquia",
-  "Eslovenia", "España", "Estados Unidos", "Estonia", "Esuatini", "Etiopía", "Filipinas", "Finlandia", "Fiyi", "Francia",
-  "Gabón", "Gambia", "Georgia", "Ghana", "Granada", "Grecia", "Guatemala", "Guinea", "Guinea-Bisáu", "Guinea Ecuatorial",
-  "Guyana", "Haití", "Honduras", "Hungría", "India", "Indonesia", "Irak", "Irán", "Irlanda", "Islandia", "Islas Marshall",
-  "Islas Salomón", "Israel", "Italia", "Jamaica", "Japón", "Jordania", "Kazajistán", "Kenia", "Kirguistán", "Kiribati",
-  "Kuwait", "Laos", "Lesoto", "Letonia", "Líbano", "Liberia", "Libia", "Liechtenstein", "Lituania", "Luxemburgo",
-  "Macedonia del Norte", "Madagascar", "Malasia", "Malaui", "Maldivas", "Malí", "Malta", "Marruecos", "Mauricio",
-  "Mauritania", "México", "Micronesia", "Moldavia", "Mónaco", "Mongolia", "Montenegro", "Mozambique", "Namibia", "Nauru",
-  "Nepal", "Nicaragua", "Níger", "Nigeria", "Noruega", "Nueva Zelanda", "Omán", "Países Bajos", "Pakistán", "Palaos",
-  "Panamá", "Papúa Nueva Guinea", "Paraguay", "Perú", "Polonia", "Portugal", "Reino Unido", "República Centroafricana",
-  "República Checa", "República del Congo", "República Democrática del Congo", "República Dominicana", "Ruanda", "Rumania",
-  "Rusia", "Samoa", "San Cristóbal y Nieves", "San Marino", "San Vicente y las Granadinas", "Santa Lucía", "Santo Tomé y Príncipe",
-  "Senegal", "Serbia", "Seychelles", "Sierra Leona", "Singapur", "Siria", "Somalia", "Sri Lanka", "Sudáfrica", "Sudán",
-  "Sudán del Sur", "Suecia", "Suiza", "Surinam", "Tailandia", "Tanzania", "Tayikistán", "Timor Oriental", "Togo", "Tonga",
-  "Trinidad y Tobago", "Túnez", "Turkmenistán", "Turquía", "Tuvalu", "Ucrania", "Uganda", "Uruguay", "Uzbekistán",
-  "Vanuatu", "Vaticano", "Venezuela", "Vietnam", "Yemen", "Yibuti", "Zambia", "Zimbabue"
+  "Afganistán",
+  "Albania",
+  "Alemania",
+  "Andorra",
+  "Angola",
+  "Antigua y Barbuda",
+  "Arabia Saudita",
+  "Argelia",
+  "Argentina",
+  "Armenia",
+  "Australia",
+  "Austria",
+  "Azerbaiyán",
+  "Bahamas",
+  "Bangladés",
+  "Barbados",
+  "Baréin",
+  "Bélgica",
+  "Belice",
+  "Benín",
+  "Bielorrusia",
+  "Birmania",
+  "Bolivia",
+  "Bosnia y Herzegovina",
+  "Botsuana",
+  "Brasil",
+  "Brunéi",
+  "Bulgaria",
+  "Burkina Faso",
+  "Burundi",
+  "Bután",
+  "Cabo Verde",
+  "Camboya",
+  "Camerún",
+  "Canadá",
+  "Catar",
+  "Chad",
+  "Chile",
+  "China",
+  "Chipre",
+  "Colombia",
+  "Comoras",
+  "Corea del Norte",
+  "Corea del Sur",
+  "Costa de Marfil",
+  "Costa Rica",
+  "Croacia",
+  "Cuba",
+  "Dinamarca",
+  "Dominica",
+  "Ecuador",
+  "Egipto",
+  "El Salvador",
+  "Emiratos Árabes Unidos",
+  "Eritrea",
+  "Eslovaquia",
+  "Eslovenia",
+  "España",
+  "Estados Unidos",
+  "Estonia",
+  "Esuatini",
+  "Etiopía",
+  "Filipinas",
+  "Finlandia",
+  "Fiyi",
+  "Francia",
+  "Gabón",
+  "Gambia",
+  "Georgia",
+  "Ghana",
+  "Granada",
+  "Grecia",
+  "Guatemala",
+  "Guinea",
+  "Guinea-Bisáu",
+  "Guinea Ecuatorial",
+  "Guyana",
+  "Haití",
+  "Honduras",
+  "Hungría",
+  "India",
+  "Indonesia",
+  "Irak",
+  "Irán",
+  "Irlanda",
+  "Islandia",
+  "Islas Marshall",
+  "Islas Salomón",
+  "Israel",
+  "Italia",
+  "Jamaica",
+  "Japón",
+  "Jordania",
+  "Kazajistán",
+  "Kenia",
+  "Kirguistán",
+  "Kiribati",
+  "Kuwait",
+  "Laos",
+  "Lesoto",
+  "Letonia",
+  "Líbano",
+  "Liberia",
+  "Libia",
+  "Liechtenstein",
+  "Lituania",
+  "Luxemburgo",
+  "Macedonia del Norte",
+  "Madagascar",
+  "Malasia",
+  "Malaui",
+  "Maldivas",
+  "Malí",
+  "Malta",
+  "Marruecos",
+  "Mauricio",
+  "Mauritania",
+  "México",
+  "Micronesia",
+  "Moldavia",
+  "Mónaco",
+  "Mongolia",
+  "Montenegro",
+  "Mozambique",
+  "Namibia",
+  "Nauru",
+  "Nepal",
+  "Nicaragua",
+  "Níger",
+  "Nigeria",
+  "Noruega",
+  "Nueva Zelanda",
+  "Omán",
+  "Países Bajos",
+  "Pakistán",
+  "Palaos",
+  "Panamá",
+  "Papúa Nueva Guinea",
+  "Paraguay",
+  "Perú",
+  "Polonia",
+  "Portugal",
+  "Reino Unido",
+  "República Centroafricana",
+  "República Checa",
+  "República del Congo",
+  "República Democrática del Congo",
+  "República Dominicana",
+  "Ruanda",
+  "Rumania",
+  "Rusia",
+  "Samoa",
+  "San Cristóbal y Nieves",
+  "San Marino",
+  "San Vicente y las Granadinas",
+  "Santa Lucía",
+  "Santo Tomé y Príncipe",
+  "Senegal",
+  "Serbia",
+  "Seychelles",
+  "Sierra Leona",
+  "Singapur",
+  "Siria",
+  "Somalia",
+  "Sri Lanka",
+  "Sudáfrica",
+  "Sudán",
+  "Sudán del Sur",
+  "Suecia",
+  "Suiza",
+  "Surinam",
+  "Tailandia",
+  "Tanzania",
+  "Tayikistán",
+  "Timor Oriental",
+  "Togo",
+  "Tonga",
+  "Trinidad y Tobago",
+  "Túnez",
+  "Turkmenistán",
+  "Turquía",
+  "Tuvalu",
+  "Ucrania",
+  "Uganda",
+  "Uruguay",
+  "Uzbekistán",
+  "Vanuatu",
+  "Vaticano",
+  "Venezuela",
+  "Vietnam",
+  "Yemen",
+  "Yibuti",
+  "Zambia",
+  "Zimbabue",
 ];
 
 const PROVINCIAS_ARG = [
-  "Buenos Aires", "Ciudad Autónoma de Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes",
-  "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro",
-  "Salta", "San Juan", "San Luis", "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+  "Buenos Aires",
+  "Ciudad Autónoma de Buenos Aires",
+  "Catamarca",
+  "Chaco",
+  "Chubut",
+  "Córdoba",
+  "Corrientes",
+  "Entre Ríos",
+  "Formosa",
+  "Jujuy",
+  "La Pampa",
+  "La Rioja",
+  "Mendoza",
+  "Misiones",
+  "Neuquén",
+  "Río Negro",
+  "Salta",
+  "San Juan",
+  "San Luis",
+  "Santa Cruz",
+  "Santa Fe",
+  "Santiago del Estero",
+  "Tierra del Fuego",
+  "Tucumán",
 ];
 
 const DEPTOS_Y_MUNICIPIOS_CORRIENTES = {
   "Bella Vista": ["Bella Vista", "Tres de Abril"],
   "Berón de Astrada": ["Berón de Astrada"],
-  "Capital": ["Corrientes", "Riachuelo"],
-  "Concepción": ["Concepción del Yaguareté Corá", "Santa Rosa", "Tabay", "Tatacuá"],
+  Capital: ["Corrientes", "Riachuelo"],
+  Concepción: [
+    "Concepción del Yaguareté Corá",
+    "Santa Rosa",
+    "Tabay",
+    "Tatacuá",
+  ],
   "Curuzú Cuatiá": ["Cazadores Correntinos", "Curuzú Cuatiá", "Perugorría"],
-  "Empedrado": ["El Sombrero", "Empedrado", "Manuel Derqui"],
-  "Esquina": ["Esquina", "Malvinas", "Pueblo Libertador"],
+  Empedrado: ["El Sombrero", "Empedrado", "Manuel Derqui"],
+  Esquina: ["Esquina", "Malvinas", "Pueblo Libertador"],
   "General Alvear": ["Alvear", "Torrent"],
-  "General Paz": ["Caá Catí", "Itá Ibaté", "Lomas de Vallejos", "Palmar Grande"],
-  "Goya": ["Colonia Carolina", "Goya", "San Isidro"],
-  "Itatí": ["Itatí", "Ramada Paso"],
-  "Ituzaingó": ["Colonia Liebig", "Ituzaingó", "San Antonio de Apipé", "San Carlos", "Villa Olivari"],
-  "Lavalle": ["Cecilio Echavarría", "Cruz de los Milagros", "Gobernador Martínez", "Lavalle", "Santa Lucía", "Yataytí Calle"],
-  "Mburucuyá": ["Mburucuyá"],
-  "Mercedes": ["Felipe Yofré", "Mariano I. Loza", "Mercedes"],
-  "Monte Caseros": ["Colonia Libertad", "Juan Pujol", "Mocoretá", "Monte Caseros"],
-  "Paso de los Libres": ["Bonpland", "Parada Pucheta", "Paso de los Libres", "Tapebicuá"],
-  "Saladas": ["Pago de los Deseos", "Saladas", "San Lorenzo"],
+  "General Paz": [
+    "Caá Catí",
+    "Itá Ibaté",
+    "Lomas de Vallejos",
+    "Palmar Grande",
+  ],
+  Goya: ["Colonia Carolina", "Goya", "San Isidro"],
+  Itatí: ["Itatí", "Ramada Paso"],
+  Ituzaingó: [
+    "Colonia Liebig",
+    "Ituzaingó",
+    "San Antonio de Apipé",
+    "San Carlos",
+    "Villa Olivari",
+  ],
+  Lavalle: [
+    "Cecilio Echavarría",
+    "Cruz de los Milagros",
+    "Gobernador Martínez",
+    "Lavalle",
+    "Santa Lucía",
+    "Yataytí Calle",
+  ],
+  Mburucuyá: ["Mburucuyá"],
+  Mercedes: ["Felipe Yofré", "Mariano I. Loza", "Mercedes"],
+  "Monte Caseros": [
+    "Colonia Libertad",
+    "Juan Pujol",
+    "Mocoretá",
+    "Monte Caseros",
+  ],
+  "Paso de los Libres": [
+    "Bonpland",
+    "Parada Pucheta",
+    "Paso de los Libres",
+    "Tapebicuá",
+  ],
+  Saladas: ["Pago de los Deseos", "Saladas", "San Lorenzo"],
   "San Cosme": ["Paso de la Patria", "San Cosme", "Santa Ana de los Guácaras"],
   "San Luis del Palmar": ["Herlitzka", "San Luis del Palmar"],
   "San Martín": ["Colonia Carlos Pellegrini", "Guaviraví", "La Cruz", "Yapeyú"],
   "San Miguel": ["El Caimán", "Loreto", "San Miguel"],
-  "San Roque": ["9 de Julio", "Chavarría", "Colonia Pando", "Mantilla", "San Roque"],
+  "San Roque": [
+    "9 de Julio",
+    "Chavarría",
+    "Colonia Pando",
+    "Mantilla",
+    "San Roque",
+  ],
   "Santo Tomé": ["Garaví", "Garruchos", "Gobernador Virasoro", "Santo Tomé"],
-  "Sauce": ["Sauce"]
+  Sauce: ["Sauce"],
 };
 
 function inicializarCascadaDomicilio() {
@@ -902,7 +1575,7 @@ function inicializarCascadaDomicilio() {
     const esArg = selectPais.value === "Argentina";
 
     if (esArg) {
-      contProv.innerHTML = `<label for="domicilio_provincia">Provincia *</label><select name="domicilio_provincia" id="domicilio_provincia" required></select>`;
+      contProv.innerHTML = `<label for="domicilio_provincia">Provincia</label><select name="domicilio_provincia" id="domicilio_provincia" required></select>`;
       const selProv = document.getElementById("domicilio_provincia");
 
       PROVINCIAS_ARG.sort((a, b) => a.localeCompare("es")).forEach((p) => {
@@ -915,11 +1588,10 @@ function inicializarCascadaDomicilio() {
 
       configurarCamposSegunProvincia();
       selProv.addEventListener("change", configurarCamposSegunProvincia);
-
     } else {
-      contProv.innerHTML = `<label for="domicilio_provincia">Provincia / Estado / Región *</label><input type="text" name="domicilio_provincia" id="domicilio_provincia" required>`;
-      contDepto.innerHTML = `<label for="domicilio_depto">Departamento / Condado *</label><input type="text" name="domicilio_depto" id="domicilio_depto" required>`;
-      contMuni.innerHTML = `<label for="domicilio_municipio">Municipio / Ciudad *</label><input type="text" name="domicilio_municipio" id="domicilio_municipio" required>`;
+      contProv.innerHTML = `<label for="domicilio_provincia">Provincia / Estado / Región</label><input type="text" name="domicilio_provincia" id="domicilio_provincia" required>`;
+      contDepto.innerHTML = `<label for="domicilio_depto">Departamento / Condado</label><input type="text" name="domicilio_depto" id="domicilio_depto" required>`;
+      contMuni.innerHTML = `<label for="domicilio_municipio">Municipio / Ciudad</label><input type="text" name="domicilio_municipio" id="domicilio_municipio" required>`;
 
       const sec3 = document.getElementById("sec-3");
       if (sec3) validarSeccion(sec3, "badge-sec-3");
@@ -931,7 +1603,7 @@ function inicializarCascadaDomicilio() {
     const esCorrientes = selProv && selProv.value === "Corrientes";
 
     if (esCorrientes) {
-      contDepto.innerHTML = `<label for="domicilio_depto">Departamento *</label><select name="domicilio_depto" id="domicilio_depto" required></select>`;
+      contDepto.innerHTML = `<label for="domicilio_depto">Departamento</label><select name="domicilio_depto" id="domicilio_depto" required></select>`;
       const selDepto = document.getElementById("domicilio_depto");
 
       const optVacia = document.createElement("option");
@@ -939,14 +1611,16 @@ function inicializarCascadaDomicilio() {
       optVacia.textContent = "Seleccionar...";
       selDepto.appendChild(optVacia);
 
-      Object.keys(DEPTOS_Y_MUNICIPIOS_CORRIENTES).sort((a, b) => a.localeCompare("es")).forEach((depto) => {
-        const opt = document.createElement("option");
-        opt.value = depto;
-        opt.textContent = depto;
-        selDepto.appendChild(opt);
-      });
+      Object.keys(DEPTOS_Y_MUNICIPIOS_CORRIENTES)
+        .sort((a, b) => a.localeCompare("es"))
+        .forEach((depto) => {
+          const opt = document.createElement("option");
+          opt.value = depto;
+          opt.textContent = depto;
+          selDepto.appendChild(opt);
+        });
 
-      contMuni.innerHTML = `<label for="domicilio_municipio">Municipio *</label><select name="domicilio_municipio" id="domicilio_municipio" required><option value="">Elegir departamento primero...</option></select>`;
+      contMuni.innerHTML = `<label for="domicilio_municipio">Municipio</label><select name="domicilio_municipio" id="domicilio_municipio" required><option value="">Elegir departamento primero...</option></select>`;
       const selMuni = document.getElementById("domicilio_municipio");
 
       selDepto.addEventListener("change", () => {
@@ -975,10 +1649,9 @@ function inicializarCascadaDomicilio() {
         const sec3 = document.getElementById("sec-3");
         if (sec3) validarSeccion(sec3, "badge-sec-3");
       });
-
     } else {
-      contDepto.innerHTML = `<label for="domicilio_depto">Departamento / Partido *</label><input type="text" name="domicilio_depto" id="domicilio_depto" required>`;
-      contMuni.innerHTML = `<label for="domicilio_municipio">Municipio / Localidad *</label><input type="text" name="domicilio_municipio" id="domicilio_municipio" required>`;
+      contDepto.innerHTML = `<label for="domicilio_depto">Departamento / Partido</label><input type="text" name="domicilio_depto" id="domicilio_depto" required>`;
+      contMuni.innerHTML = `<label for="domicilio_municipio">Municipio / Localidad</label><input type="text" name="domicilio_municipio" id="domicilio_municipio" required>`;
     }
 
     const sec3 = document.getElementById("sec-3");
@@ -993,32 +1666,91 @@ function inicializarCascadaDomicilio() {
 // MAPEO OFICIAL CATASTRAL: DEPARTAMENTO + MUNICIPIO -> CÓDIGO DE PARTIDA
 // ==============================================================================
 const CODIGOS_CATASTRO_CORRIENTES = {
-  "Alvear": { "Alvear": "T2", "Torrent": "T6", "Estación Torrent": "T6" },
-  "General Alvear": { "Alvear": "T2", "Torrent": "T6", "Estación Torrent": "T6" },
+  Alvear: { Alvear: "T2", Torrent: "T6", "Estación Torrent": "T6" },
+  "General Alvear": { Alvear: "T2", Torrent: "T6", "Estación Torrent": "T6" },
   "Bella Vista": { "Bella Vista": "B1", "Tres de Abril": "B2" },
   "Berón de Astrada": { "Berón de Astrada": "C1" },
-  "Capital": { "Capital": "A1", "Corrientes": "A1", "Riachuelo": "A2" },
-  "Concepción": { "Concepción del Yaguareté Corá": "D1", "Concepción": "D1", "Tabay": "D2", "Santa Rosa": "D3", "Tatacuá": "D4" },
-  "Curuzú Cuatiá": { "Curuzú Cuatiá": "E1", "Perugorría": "E2" },
-  "Empedrado": { "Empedrado": "F1", "El Sombrero": "F2", "Manuel Derqui": "F1" },
-  "Esquina": { "Esquina": "G1", "Pueblo Libertador": "G2", "Malvinas": "G1" },
-  "General Paz": { "Caá Catí": "H1", "Itá Ibaté": "H2", "Lomas de Vallejos": "H3", "Palmar Grande": "H4" },
-  "Goya": { "Goya": "I1", "Colonia Carolina": "I2", "San Isidro": "I3" },
-  "Itatí": { "Itatí": "J1", "Ramada Paso": "J2" },
-  "Ituzaingó": { "Ituzaingó": "K1", "San Carlos": "K2", "Colonia Liebig": "K3", "Villa Olivari": "K5", "Colonia San Antonio": "K6", "San Antonio de Apipé": "K6" },
-  "Lavalle": { "Santa Lucía": "L1", "Gobernador Martínez": "L2", "Lavalle": "L4", "Cruz de los Milagros": "L5", "Yataytí Calle": "L7", "Cecilio Echavarría": "L4" },
-  "Mburucuyá": { "Mburucuyá": "M1" },
-  "Mercedes": { "Mercedes": "N1", "Felipe Yofré": "N2", "Mariano I. Loza": "N3" },
-  "Monte Caseros": { "Monte Caseros": "O1", "Mocoretá": "O2", "Colonia Libertad": "O3", "Juan Pujol": "O4" },
-  "Paso de los Libres": { "Paso de los Libres": "P1", "Bonpland": "P3", "Parada Pucheta": "P4", "Tapebicuá": "P5" },
-  "Saladas": { "Saladas": "Q1", "San Lorenzo": "Q2", "Pago de los Deseos": "Q3" },
-  "San Cosme": { "San Cosme": "R1", "Santa Ana de los Guácaras": "R2", "Santa Ana": "R2", "Paso de la Patria": "R3" },
-  "San Luis del Palmar": { "San Luis del Palmar": "S1", "Herlitzka": "S2" },
-  "San Martín": { "La Cruz": "T1", "Yapeyú": "T3", "Colonia Carlos Pellegrini": "T4", "Cnia. Carlos Pellegrini": "T4", "Guaviraví": "T5" },
-  "San Miguel": { "San Miguel": "U1", "Loreto": "U2", "El Caimán": "U1" },
-  "San Roque": { "Chavarría": "V1", "9 de Julio": "V2", "San Roque": "V3", "Mantilla": "V4", "Pedro R. Fernandez": "V4", "Colonia Pando": "V5" },
-  "Santo Tomé": { "Santo Tomé": "W1", "Garruchos": "W2", "Garaví": "W2", "Gobernador Virasoro": "W3", "Jose R. Gomez": "W4" },
-  "Sauce": { "Sauce": "X1" }
+  Capital: { Capital: "A1", Corrientes: "A1", Riachuelo: "A2" },
+  Concepción: {
+    "Concepción del Yaguareté Corá": "D1",
+    Concepción: "D1",
+    Tabay: "D2",
+    "Santa Rosa": "D3",
+    Tatacuá: "D4",
+  },
+  "Curuzú Cuatiá": { "Curuzú Cuatiá": "E1", Perugorría: "E2" },
+  Empedrado: { Empedrado: "F1", "El Sombrero": "F2", "Manuel Derqui": "F1" },
+  Esquina: { Esquina: "G1", "Pueblo Libertador": "G2", Malvinas: "G1" },
+  "General Paz": {
+    "Caá Catí": "H1",
+    "Itá Ibaté": "H2",
+    "Lomas de Vallejos": "H3",
+    "Palmar Grande": "H4",
+  },
+  Goya: { Goya: "I1", "Colonia Carolina": "I2", "San Isidro": "I3" },
+  Itatí: { Itatí: "J1", "Ramada Paso": "J2" },
+  Ituzaingó: {
+    Ituzaingó: "K1",
+    "San Carlos": "K2",
+    "Colonia Liebig": "K3",
+    "Villa Olivari": "K5",
+    "Colonia San Antonio": "K6",
+    "San Antonio de Apipé": "K6",
+  },
+  Lavalle: {
+    "Santa Lucía": "L1",
+    "Gobernador Martínez": "L2",
+    Lavalle: "L4",
+    "Cruz de los Milagros": "L5",
+    "Yataytí Calle": "L7",
+    "Cecilio Echavarría": "L4",
+  },
+  Mburucuyá: { Mburucuyá: "M1" },
+  Mercedes: { Mercedes: "N1", "Felipe Yofré": "N2", "Mariano I. Loza": "N3" },
+  "Monte Caseros": {
+    "Monte Caseros": "O1",
+    Mocoretá: "O2",
+    "Colonia Libertad": "O3",
+    "Juan Pujol": "O4",
+  },
+  "Paso de los Libres": {
+    "Paso de los Libres": "P1",
+    Bonpland: "P3",
+    "Parada Pucheta": "P4",
+    Tapebicuá: "P5",
+  },
+  Saladas: { Saladas: "Q1", "San Lorenzo": "Q2", "Pago de los Deseos": "Q3" },
+  "San Cosme": {
+    "San Cosme": "R1",
+    "Santa Ana de los Guácaras": "R2",
+    "Santa Ana": "R2",
+    "Paso de la Patria": "R3",
+  },
+  "San Luis del Palmar": { "San Luis del Palmar": "S1", Herlitzka: "S2" },
+  "San Martín": {
+    "La Cruz": "T1",
+    Yapeyú: "T3",
+    "Colonia Carlos Pellegrini": "T4",
+    "Cnia. Carlos Pellegrini": "T4",
+    Guaviraví: "T5",
+  },
+  "San Miguel": { "San Miguel": "U1", Loreto: "U2", "El Caimán": "U1" },
+  "San Roque": {
+    Chavarría: "V1",
+    "9 de Julio": "V2",
+    "San Roque": "V3",
+    Mantilla: "V4",
+    "Pedro R. Fernandez": "V4",
+    "Colonia Pando": "V5",
+  },
+  "Santo Tomé": {
+    "Santo Tomé": "W1",
+    Garruchos: "W2",
+    Garaví: "W2",
+    "Gobernador Virasoro": "W3",
+    "Jose R. Gomez": "W4",
+  },
+  Sauce: { Sauce: "X1" },
 };
 
 // ==============================================================================
@@ -1027,30 +1759,30 @@ const CODIGOS_CATASTRO_CORRIENTES = {
 const CODIGOS_RENSPA_CORRIENTES = {
   "Bella Vista": "001",
   "Berón de Astrada": "002",
-  "Capital": "003",
-  "Concepción": "004",
+  Capital: "003",
+  Concepción: "004",
   "Curuzú Cuatiá": "005",
-  "Empedrado": "006",
-  "Esquina": "007",
+  Empedrado: "006",
+  Esquina: "007",
   "General Alvear": "008",
-  "Alvear": "008",
+  Alvear: "008",
   "General Paz": "009",
-  "Goya": "010",
-  "Itatí": "011",
-  "Ituzaingó": "012",
-  "Lavalle": "013",
-  "Mburucuyá": "014",
-  "Mercedes": "015",
+  Goya: "010",
+  Itatí: "011",
+  Ituzaingó: "012",
+  Lavalle: "013",
+  Mburucuyá: "014",
+  Mercedes: "015",
   "Monte Caseros": "016",
   "Paso de los Libres": "017",
-  "Saladas": "018",
+  Saladas: "018",
   "San Cosme": "019",
   "San Luis del Palmar": "020",
   "San Martín": "021",
   "San Miguel": "022",
   "San Roque": "023",
   "Santo Tomé": "024",
-  "Sauce": "025"
+  Sauce: "025",
 };
 
 // ==============================================================================
@@ -1067,7 +1799,12 @@ function inicializarPredioYTenencia() {
   function obtenerPrefijoActual() {
     const depto = selDepto ? selDepto.value : "";
     const muni = selMuni ? selMuni.value : "";
-    if (depto && muni && CODIGOS_CATASTRO_CORRIENTES[depto] && CODIGOS_CATASTRO_CORRIENTES[depto][muni]) {
+    if (
+      depto &&
+      muni &&
+      CODIGOS_CATASTRO_CORRIENTES[depto] &&
+      CODIGOS_CATASTRO_CORRIENTES[depto][muni]
+    ) {
       return CODIGOS_CATASTRO_CORRIENTES[depto][muni];
     }
     return "";
@@ -1093,7 +1830,10 @@ function inicializarPredioYTenencia() {
       const prefijo = obtenerPrefijoActual();
 
       if (prefijo) {
-        let soloNumeros = val.toUpperCase().replace(prefijo, "").replace(/\D/g, "");
+        let soloNumeros = val
+          .toUpperCase()
+          .replace(prefijo, "")
+          .replace(/\D/g, "");
         let resultado = prefijo;
 
         if (soloNumeros.length > 0) {
@@ -1130,7 +1870,8 @@ function inicializarPredioYTenencia() {
       }
 
       const sec4 = document.getElementById("sec-4");
-      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+      if (sec4 && typeof validarSeccion === "function")
+        validarSeccion(sec4, "badge-sec-4");
     });
   }
 
@@ -1155,7 +1896,8 @@ function inicializarPredioYTenencia() {
     });
 
     const sec4 = document.getElementById("sec-4");
-    if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+    if (sec4 && typeof validarSeccion === "function")
+      validarSeccion(sec4, "badge-sec-4");
   }
 
   // Formateador estricto para RENSPA (04.XXX.X.XXXXX/XX)
@@ -1168,7 +1910,8 @@ function inicializarPredioYTenencia() {
       if (num.startsWith(prefijoFijo)) {
         num = prefijoFijo + num.slice(prefijoFijo.length);
       } else if (num.startsWith("04")) {
-        num = prefijoFijo + num.slice(2).replace(new RegExp("^" + codigoDepto), "");
+        num =
+          prefijoFijo + num.slice(2).replace(new RegExp("^" + codigoDepto), "");
       } else {
         num = prefijoFijo + num;
       }
@@ -1201,18 +1944,25 @@ function inicializarPredioYTenencia() {
     if (!resto) {
       inputRenspa.value = `04.${codigoDepto}.`;
     } else {
-      inputRenspa.value = formatearRenspa("04" + codigoDepto + resto, codigoDepto);
+      inputRenspa.value = formatearRenspa(
+        "04" + codigoDepto + resto,
+        codigoDepto,
+      );
     }
 
     const sec4 = document.getElementById("sec-4");
-    if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+    if (sec4 && typeof validarSeccion === "function")
+      validarSeccion(sec4, "badge-sec-4");
   }
 
   // Máscara automática y validación de formato para RENSPA
   if (inputRenspa) {
     inputRenspa.setAttribute("maxlength", "17");
     inputRenspa.setAttribute("placeholder", "04.000.0.00000/00");
-    inputRenspa.setAttribute("pattern", "^04\\.\\d{3}\\.\\d{1}\\.\\d{5}\\/\\d{2}$");
+    inputRenspa.setAttribute(
+      "pattern",
+      "^04\\.\\d{3}\\.\\d{1}\\.\\d{5}\\/\\d{2}$",
+    );
 
     inputRenspa.addEventListener("input", (e) => {
       const depto = selDepto ? selDepto.value : "";
@@ -1228,7 +1978,8 @@ function inicializarPredioYTenencia() {
       e.target.value = formateado;
 
       const sec4 = document.getElementById("sec-4");
-      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+      if (sec4 && typeof validarSeccion === "function")
+        validarSeccion(sec4, "badge-sec-4");
     });
   }
 
@@ -1239,14 +1990,20 @@ function inicializarPredioYTenencia() {
   }
 
   // Cascada de Departamento y Municipio del Predio
-  if (selDepto && selMuni && typeof DEPTOS_Y_MUNICIPIOS_CORRIENTES !== "undefined") {
+  if (
+    selDepto &&
+    selMuni &&
+    typeof DEPTOS_Y_MUNICIPIOS_CORRIENTES !== "undefined"
+  ) {
     selDepto.innerHTML = `<option value="">Seleccionar departamento...</option>`;
-    Object.keys(DEPTOS_Y_MUNICIPIOS_CORRIENTES).sort((a, b) => a.localeCompare("es")).forEach((depto) => {
-      const opt = document.createElement("option");
-      opt.value = depto;
-      opt.textContent = depto;
-      selDepto.appendChild(opt);
-    });
+    Object.keys(DEPTOS_Y_MUNICIPIOS_CORRIENTES)
+      .sort((a, b) => a.localeCompare("es"))
+      .forEach((depto) => {
+        const opt = document.createElement("option");
+        opt.value = depto;
+        opt.textContent = depto;
+        selDepto.appendChild(opt);
+      });
 
     selDepto.addEventListener("change", () => {
       const deptoElegido = selDepto.value;
@@ -1296,7 +2053,9 @@ function inicializarPredioYTenencia() {
     `;
 
     function actualizarNumeracionPartidas() {
-      const bloques = contenedorPartidas.querySelectorAll(".item-bloque-partida");
+      const bloques = contenedorPartidas.querySelectorAll(
+        ".item-bloque-partida",
+      );
       bloques.forEach((bloque, idx) => {
         const num = idx + 1;
         bloque.setAttribute("data-partida-index", num);
@@ -1308,7 +2067,9 @@ function inicializarPredioYTenencia() {
     }
 
     btnAgregar.addEventListener("click", () => {
-      const totalActual = contenedorPartidas.querySelectorAll(".item-bloque-partida").length;
+      const totalActual = contenedorPartidas.querySelectorAll(
+        ".item-bloque-partida",
+      ).length;
       const nuevoIndice = totalActual + 1;
       const prefijo = obtenerPrefijoActual();
 
@@ -1319,7 +2080,7 @@ function inicializarPredioYTenencia() {
         <div class="grid-partida-superficie">
           <div class="input-group">
             <label>Número de partida (Adrema)</label>
-            <input type="text" name="partida_numero[]" class="input-partida" value="${prefijo ? prefijo + ' ' : ''}" pattern="^[A-ZÑa-zñ]\\d\\s\\d{6}-[1-3]$" required>
+            <input type="text" name="partida_numero[]" class="input-partida" value="${prefijo ? prefijo + " " : ""}" pattern="^[A-ZÑa-zñ]\\d\\s\\d{6}-[1-3]$" required>
           </div>
           <div class="input-group">
             <label>Superficie (ha)</label>
@@ -1344,20 +2105,23 @@ function inicializarPredioYTenencia() {
         aplicarMascaraPartida(inputNuevo);
       }
 
-      filaExtra.querySelector(".btn-quitar-map").addEventListener("click", () => {
-        filaExtra.remove();
-        actualizarNumeracionPartidas();
-        const sec4 = document.getElementById("sec-4");
-        if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
-      });
+      filaExtra
+        .querySelector(".btn-quitar-map")
+        .addEventListener("click", () => {
+          filaExtra.remove();
+          actualizarNumeracionPartidas();
+          const sec4 = document.getElementById("sec-4");
+          if (sec4 && typeof validarSeccion === "function")
+            validarSeccion(sec4, "badge-sec-4");
+        });
 
       contenedorPartidas.appendChild(filaExtra);
 
       const sec4 = document.getElementById("sec-4");
-      if (sec4 && typeof validarSeccion === "function") validarSeccion(sec4, "badge-sec-4");
+      if (sec4 && typeof validarSeccion === "function")
+        validarSeccion(sec4, "badge-sec-4");
     });
   }
-
 }
 
 // ==============================================================================
@@ -1400,16 +2164,26 @@ function validarFormatoTelefono(tel) {
 // Inicialización de restricciones y filtros en tiempo real
 function inicializarRestriccionesCampos() {
   const inputsDni = document.querySelectorAll("#num_doc, [name='num_doc']");
-  const inputsTelefono = document.querySelectorAll("input[type='tel'], #telefono1, #telefono2, [name='telefono1'], [name='telefono2']");
-  const inputsTextoNombre = document.querySelectorAll("#productor_fisica, #declarante_juridica, #razon_social, #caracter_otro, [name='productor_fisica'], [name='declarante_juridica'], [name='razon_social']");
-  const inputsSuperficie = document.querySelectorAll("input[type='number'], .input-superficie, #sup_arroz, #sup_sembrada, #sup_regada");
+  const inputsTelefono = document.querySelectorAll(
+    "input[type='tel'], #telefono1, #telefono2, [name='telefono1'], [name='telefono2']",
+  );
+  const inputsTextoNombre = document.querySelectorAll(
+    "#productor_fisica, #declarante_juridica, #razon_social, #caracter_otro, [name='productor_fisica'], [name='declarante_juridica'], [name='razon_social']",
+  );
+  const inputsSuperficie = document.querySelectorAll(
+    "input[type='number'], .input-superficie, #sup_arroz, #sup_sembrada, #sup_regada",
+  );
 
-  // DNI: Solo números (7 u 8 dígitos)
+  // Documento: Solo números (7 u 8 dígitos para DNI, hasta 7 para LC/LE)
   inputsDni.forEach((input) => {
-    input.setAttribute("maxlength", "8");
     input.setAttribute("inputmode", "numeric");
     input.addEventListener("input", (e) => {
-      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 8);
+      const selectTipoDoc = document.getElementById("tipo_doc");
+      const tipo = selectTipoDoc ? selectTipoDoc.value : "DNI";
+      const maxLen = (tipo === "LC" || tipo === "LE") ? 7 : 8;
+
+      input.setAttribute("maxlength", String(maxLen));
+      e.target.value = e.target.value.replace(/\D/g, "").slice(0, maxLen);
     });
   });
 
@@ -1428,7 +2202,10 @@ function inicializarRestriccionesCampos() {
   // Nombres y Razón Social: Bloqueo de caracteres numéricos o símbolos extraños no corporativos
   inputsTextoNombre.forEach((input) => {
     input.addEventListener("input", (e) => {
-      e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.,&'-]/g, "");
+      e.target.value = e.target.value.replace(
+        /[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.,&'-]/g,
+        "",
+      );
     });
   });
 
